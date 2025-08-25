@@ -28,7 +28,7 @@ fix m5 all property/global coefficientFriction peratomtypepair ${nparticletype} 
 fix cylwall all wall/gran model hertz/stiffness tangential history primitive type 1 zcylinder ${piperadius} 0.0 0.0
 ##### write restart #####
 shell mkdir restart
-restart ${dumpstep} restart.bk1 restart.bk2
+restart ${dumpstep} ./restart/restart.bk1 ./restart/restart.bk2
 
 #### Insertion step #####
 region reg cylinder z 0.0 0.0 ${piperadius} 0 ${pipelength} units box
