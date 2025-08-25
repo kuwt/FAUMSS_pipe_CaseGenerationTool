@@ -203,6 +203,7 @@ if __name__ == "__main__":
             target_content.append("variable zmax equal {}\n".format(pipeLength+simulationBoxEpsilon))
             target_content.append("variable pipelength equal {}\n".format(pipeLength))
             target_content.append("variable piperadius equal {}\n".format(pipeRadius))
+
             target_content.append( "################### variable definition finished #####################\n\n\n")
           
             target_path = output_directory + "/init.in"

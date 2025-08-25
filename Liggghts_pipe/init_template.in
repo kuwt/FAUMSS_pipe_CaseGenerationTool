@@ -1,12 +1,11 @@
 ##### Header for General commands #####
 atom_style granular
 boundary f f p 
+units si
 communicate single vel yes
 newton off 
 
 ##### Definition of simulationbox #####
-#region simulationdomain block ${xmin} ${xmax} ${ymin} ${ymax} ${zmin} ${zmax} units box
-#create_box 4 simulationdomain
 read_data walltexture.dat
 neighbor	0.00024 bin
 neigh_modify	delay 0

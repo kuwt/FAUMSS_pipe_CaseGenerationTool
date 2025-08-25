@@ -11,7 +11,7 @@ read_restart    ./restart/restart.bk1
 ##### Dynamics fix #####
 timestep ${dt}
 fix integrator all nve/sphere
-fix gravi all gravity ${nparticletype} vector 0.0 0.0 -1.0
+fix gravi all gravity 9.81 vector 0.0 0.0 -1.0
 
 ##### Definition of the contact models #####
 pair_style gran model hertz/stiffness tangential history limitForce on tangential_damping on #contact model
