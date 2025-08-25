@@ -18,23 +18,28 @@ pair_style gran model hertz/stiffness tangential history limitForce on tangentia
 pair_coeff * * #default
 
 ##### Material fix #####
-fix m1 all property/global kn peratomtypepair ${nparticletype} ${kn00} ${kn01} ${kn02} ${kn03} ${kn10} ${kn11} ${kn12} ${kn13} ${kn20} ${kn21} ${kn22} ${kn23} ${kn30} ${kn31} ${kn32} ${kn33}
-fix m2 all property/global kt peratomtypepair ${nparticletype} ${kt00} ${kt01} ${kt02} ${kt03} ${kt10} ${kt11} ${kt12} ${kt13} ${kt20} ${kt21} ${kt22} ${kt23} ${kt30} ${kt31} ${kt32} ${kt33}
-fix m3 all property/global gamman peratomtypepair ${nparticletype} ${gamman00} ${gamman01} ${gamman02} ${gamman03} ${gamman10} ${gamman11} ${gamman12} ${gamman13} ${gamman20} ${gamman21} ${gamman22} ${gamman23} ${gamman30} ${gamman31} ${gamman32} ${gamman33}
-fix m4 all property/global gammat peratomtypepair ${nparticletype} ${gammat00} ${gammat01} ${gammat02} ${gammat03} ${gammat10} ${gammat11} ${gammat12} ${gammat13} ${gammat20} ${gammat21} ${gammat22} ${gammat23} ${gammat30} ${gammat31} ${gammat32} ${gammat33}
-fix m5 all property/global coefficientFriction peratomtypepair ${nparticletype} ${sfc00} ${sfc01} ${sfc02} ${sfc03} ${sfc10} ${sfc11} ${sfc12} ${sfc13} ${sfc20} ${sfc21} ${sfc22} ${sfc23} ${sfc30} ${sfc31} ${sfc32} ${sfc33}
+fix m1 all property/global kn peratomtypepair ${nparticletype} ${kn11} ${kn12} ${kn13} ${kn14} ${kn21} ${kn22} ${kn23} ${kn24} ${kn31} ${kn32} ${kn33} ${kn34} ${kn41} ${kn42} ${kn43} ${kn44}
+fix m2 all property/global kt peratomtypepair ${nparticletype} ${kt11} ${kt12} ${kt13} ${kt14} ${kt21} ${kt22} ${kt23} ${kt24} ${kt31} ${kt32} ${kt33} ${kt34} ${kt41} ${kt42} ${kt43} ${kt44}
+fix m3 all property/global gamman peratomtypepair ${nparticletype} ${gamman11} ${gamman12} ${gamman13} ${gamman14} ${gamman21} ${gamman22} ${gamman23} ${gamman24} ${gamman31} ${gamman32} ${gamman33} ${gamman34} ${gamman41} ${gamman42} ${gamman43} ${gamman44}
+fix m4 all property/global gammat peratomtypepair ${nparticletype} ${gammat11} ${gammat12} ${gammat13} ${gammat14} ${gammat21} ${gammat22} ${gammat23} ${gammat24} ${gammat31} ${gammat32} ${gammat33} ${gammat34} ${gammat41} ${gammat42} ${gammat43} ${gammat44}
+fix m5 all property/global coefficientFriction peratomtypepair ${nparticletype} ${sfc11} ${sfc12} ${sfc13} ${sfc14} ${sfc21} ${sfc22} ${sfc23} ${sfc24} ${sfc31} ${sfc32} ${sfc33} ${sfc34} ${sfc41} ${sfc42} ${sfc43} ${sfc44}
 
-##### Geometry fix#####
+##### Geometry fix #####
 fix cylwall all wall/gran model hertz/stiffness tangential history primitive type 1 zcylinder ${piperadius} 0.0 0.0
+
+##### Wall texture fix #####
+group walltexture type 2
+fix frz1 walltexture freeze
+
 ##### write restart #####
 shell mkdir restart
 restart ${dumpstep} ./restart/restart.bk1 ./restart/restart.bk2
 
 #### Insertion step #####
 region reg cylinder z 0.0 0.0 ${piperadius} 0 ${pipelength} units box
-fix pts222 all particletemplate/sphere ${theseed0} atom_type 3 density constant ${particledensity22} radius constant ${particleradii222}
-fix pts333 all particletemplate/sphere ${theseed1} atom_type 4 density constant ${particledensity33} radius constant ${particleradii333}
-fix pdd1 all particledistribution/discrete/massbased ${theseed2} 2 pts222 ${particlefraction222} pts333 ${particlefraction333}
+fix pts3 all particletemplate/sphere ${theseed0} atom_type 3 density constant ${particledensity3} radius constant ${particleradii3}
+fix pts4 all particletemplate/sphere ${theseed1} atom_type 4 density constant ${particledensity4} radius constant ${particleradii4}
+fix pdd1 all particledistribution/discrete/massbased ${theseed2} 2 pts3 ${particlefraction3} pts4 ${particlefraction4}
 fix ins all insert/rate/region seed ${theseed3} distributiontemplate pdd1 maxattempt ${maxparticleinsert} nparticles ${realparticleinsert} particlerate ${insertionparticlerate} insert_every 10 &
 overlapcheck yes all_in yes vel uniform 0.0 0.0 -3.0 0.2 0.2 0.2 region reg
 run ${insertionstep}
