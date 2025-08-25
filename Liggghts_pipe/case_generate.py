@@ -9,7 +9,6 @@ import random
 import math
 import numpy as np
 import loadJSONPara
-import fileUtility
 import getA
 
 #####################################################################################
@@ -245,19 +244,4 @@ if __name__ == "__main__":
                     templ_content = templ_file.readlines()
                     target_content = target_content + templ_content
                     target_file.writelines(target_content)
-                    print("write file: {}".format(target_path))
-            ###########################################################################
-            # Create sbatch
-            #####################################################################################
-            sbatchName = output_directory
-            sbatch_variables = {
-                "dummyvariable": 100
-            }
-            target_path = output_directory + "/" + sbatchName + ".sbatch"
-            with open(target_path, "w") as target_file:
-                with open("template.sbatch") as templ_file:
-                    target_content = templ_file.read()
-                    for key, val in sbatch_variables.items():
-                        target_content = target_content.replace(f"{{{key}}}", str(val))
-                    target_file.write(target_content)
                     print("write file: {}".format(target_path))
