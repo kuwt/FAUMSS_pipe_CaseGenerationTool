@@ -5,7 +5,6 @@ import pathlib
 import shutil
 import subprocess
 import glob
-import random
 import math
 import numpy as np
 
@@ -33,8 +32,8 @@ if __name__ == "__main__":
         numOfTrial = loadJSONPara.readwithdefault(json_file_path,"numOfTrial",1)
         timeStepSize = loadJSONPara.read(json_file_path,"timeStepSize")
         dumpTimeInteval = loadJSONPara.read(json_file_path,"dumpTimeInteval") 
-        insertionTime = loadJSONPara.read(json_file_path,"insertionTime") 
-        unrecordedSimulationTime = loadJSONPara.readwithdefault(json_file_path,"unrecordedSimulationTime", 0)
+       # insertionTime = loadJSONPara.read(json_file_path,"insertionTime") 
+       # unrecordedSimulationTime = loadJSONPara.readwithdefault(json_file_path,"unrecordedSimulationTime", 0)
         simulationTime = loadJSONPara.read(json_file_path,"simulationTime")
         pipeRadius = loadJSONPara.read(json_file_path,"pipeRadius") 
         pipeLength = loadJSONPara.read(json_file_path,"pipeLength") 
@@ -59,12 +58,16 @@ if __name__ == "__main__":
         if enableHelixWallTexture == True:
             helixAmplitude = loadJSONPara.read(json_file_path,"helixAmplitude") 
             helixPeriod = loadJSONPara.read(json_file_path,"helixPeriod") 
+
+        fluidVelocity = loadJSONPara.read(json_file_path,"fluidVelocity")
+        kinematicViscosity = loadJSONPara.read(json_file_path,"kinematicViscosity")
+        gravity = loadJSONPara.read(json_file_path,"gravity")
         numOfProcessor = loadJSONPara.readwithdefault(json_file_path,"numOfProcessor",4) 
         ###########################################################################
         # Create random prime number base
         ######################################################################################
         numOfSeedsRequiredPerCase = 4
-        primeNumberDataBase = mathUtility.generate_prime_list(numOfTrial * numOfSeedsRequiredPerCase, 31, 500000)
+        primeNumberDataBase = functionUtility.generate_prime_list(numOfTrial * numOfSeedsRequiredPerCase, 31, 500000)
         print("primeNumberDataBase = {}".format(primeNumberDataBase))
         
         ###########################################################################
@@ -74,7 +77,81 @@ if __name__ == "__main__":
             output_directory = pathlib.Path(json_file_path).stem + "_{}".format(trialid)
             if not os.path.exists(output_directory):
                 os.mkdir(output_directory)
+            
+            ###########################################################################
+            # Create CFD
+            #####################################################################################
+            CFD_dir = output_directory + "/CFD/"
+            if not os.path.exists(CFD_dir):
+                os.mkdir(CFD_dir)
+            ###########################################################################
+            # Create CFD/0
+            #####################################################################################
+            CFD_0_dir = CFD_dir + "/0/"
+            if not os.path.exists(CFD_0_dir):
+                os.mkdir(CFD_0_dir)
 
+            variables = {
+            "fluidVelocity": fluidVelocity
+            }
+            
+            fileUtility.copyfile("CFD/0_template/U", CFD_0_dir + "U", variables)
+            fileUtility.copyfile("CFD/0_template/Us", CFD_0_dir + "Us")
+            fileUtility.copyfile("CFD/0_template/p", CFD_0_dir + "p")
+            fileUtility.copyfile("CFD/0_template/voidfraction", CFD_0_dir + "voidfraction")
+            ###########################################################################
+            # Create CFD/system
+            #####################################################################################
+            CFD_system_dir = CFD_dir + "/system/"
+            if not os.path.exists(CFD_system_dir):
+                os.mkdir(CFD_system_dir)
+
+            gridnumXY = math.ceil(2*pipeRadius/gridSizeXY)
+            print(gridnumXY)
+            gridnumXYPart1 = math.ceil(gridnumXY/2)
+            gridnumXYPart2 = math.ceil(gridnumXYPart1/2)
+            gridnumZ = math.ceil(pipeLength/gridSizeZ)
+            print(gridnumZ)
+             
+            variables = {
+            "pipeRadius": pipeRadius,
+            "pipeLength": pipeLength,
+            "halfpipeRadius": pipeRadius * 0.5,
+            "diagonalPos": pipeRadius * np.cos(np.pi/4),
+            "gridnumXYPart1": gridnumXYPart1,
+            "gridnumXYPart2": gridnumXYPart2,
+            "gridnumZ": gridnumZ
+            }
+            fileUtility.copyfile("CFD/system_template/blockMeshDict", CFD_system_dir + "blockMeshDict", variables)
+            fileUtility.copyfile("CFD/system_template/fvSchemes", CFD_system_dir + "fvSchemes")
+            fileUtility.copyfile("CFD/system_template/fvSolution", CFD_system_dir + "fvSolution")
+            variables = {
+            "numOfProcessor":numOfProcessor
+            }
+            fileUtility.copyfile("CFD/system_template/decomposeParDict", CFD_system_dir + "decomposeParDict",variables)
+            variables = {
+            "simulationTime":simulationTime
+            }
+            fileUtility.copyfile("CFD/system_template/controlDict", CFD_system_dir + "controlDict",variables)
+
+            ###########################################################################
+            # Create CFD/constant
+            #####################################################################################
+            CFD_constant_dir = CFD_dir + "/constant/"
+            if not os.path.exists(CFD_constant_dir):
+                os.mkdir(CFD_constant_dir)
+            fileUtility.copyfile("CFD/constant_template/turbulenceProperties", CFD_constant_dir + "turbulenceProperties")
+            variables = {
+            "kinematicViscosity":kinematicViscosity
+            }
+            fileUtility.copyfile("CFD/constant_template/transportProperties", CFD_constant_dir + "transportProperties",variables)
+
+            variables = {
+            "gravity":gravity
+            }
+            fileUtility.copyfile("CFD/constant_template/g", CFD_constant_dir + "g",variables)
+            fileUtility.copyfile("CFD/constant_template/couplingProperties", CFD_constant_dir + "couplingProperties",variables)
+            fileUtility.copyfile("CFD/constant_template/liggghtsCommands", CFD_constant_dir + "liggghtsCommands",variables)
             ###########################################################################
             # Create wall texture
             ######################################################################################
@@ -83,6 +160,7 @@ if __name__ == "__main__":
             textureRadius = particleRadius[textureSpecies]
             textureDensity = particleDensity[textureSpecies]
             textureAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(textureSpecies)
+            textureDir = output_directory + "/DEM/"
             if enableHelixWallTexture == True:
                 helixWallTextureGenerator.helixWallTextureGenerator(
                                 nparticletype, 
@@ -97,7 +175,7 @@ if __name__ == "__main__":
                                 -simulationBoxEpsilon,
                                 pipeLength,
                                 0,
-                                output_directory)      
+                                textureDir)      
             else:
                 defaultWallTextureGenerator.defaultWallTextureGenerator( 
                             nparticletype, 
@@ -109,9 +187,16 @@ if __name__ == "__main__":
                             pipeRadius * simulationBoxExtendFactor,
                             -simulationBoxEpsilon,
                             pipeLength,
-                            output_directory)
+                            textureDir)
+
             ###########################################################################
-            # Create init.in
+            # Create DEM 
+            #####################################################################################
+            DEM_dir = output_directory + "/DEM/"
+            if not os.path.exists(DEM_dir):
+                os.mkdir(DEM_dir)
+            ###########################################################################
+            # Create DEM/init.in
             #####################################################################################
             target_content = []
             target_content.append( "################### variable definition start #####################\n")
@@ -125,16 +210,10 @@ if __name__ == "__main__":
             target_content.append("variable piperadius equal {}\n".format(pipeRadius))
 
             target_content.append( "################### variable definition finished #####################\n\n\n")
-          
-            target_path = output_directory + "/init.in"
-            with open(target_path, "w") as target_file:
-                with open("init_template.in") as templ_file:
-                    templ_content = templ_file.readlines()
-                    target_content = target_content + templ_content
-                    target_file.writelines(target_content)
-                    print("write file: {}".format(target_path))
+            fileUtility.copyfilePrepend("DEM/init_template.in" ,DEM_dir + "/init.in",target_content)
+
             ###########################################################################
-            # Create run.in
+            # Create DEM/run.in
             #####################################################################################
             target_content = []
             target_content.append( "################### variable definition start #####################\n")
@@ -176,15 +255,15 @@ if __name__ == "__main__":
             target_content.append( "##### particle properties geo #######\n")
             for i in range(nparticletype):
                 if i >= particleSpecies:
-                    target_content.append("variable particleradii{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
-                    target_content.append("variable particlefraction{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
-                    target_content.append("variable particledensity{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
+                    target_content.append("variable particleradii{} equal {}\n".format(cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
+                    target_content.append("variable particlefraction{} equal {}\n".format(cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
+                    target_content.append("variable particledensity{} equal {}\n".format(cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
             
             target_content.append( "##### particle number #######\n")
             particleNum = 0
             pipeVolume = np.pi * (pipeRadius **2 ) * pipeLength
             for radius,solidFrac in zip(particleRadius,particleSolidFrac):
-                particleVolume = mathUtility.computeSphereVolume(radius)
+                particleVolume = computeSphereVolume(radius)
                 particleNum += solidFrac * pipeVolume/particleVolume
             particleNum = math.ceil(particleNum)
             print("Total particleNum : {}".format(particleNum))
@@ -204,25 +283,12 @@ if __name__ == "__main__":
                 target_content.append("variable theseed{} equal {}\n".format(i,primeNumberDataBase[trialid * numOfSeedsRequiredPerCase + i]))
         
             target_content.append( "################### variable definition finished #####################\n\n\n")
-            target_path = output_directory + "/run.in" 
-            with open(target_path, "w") as target_file:
-                with open("run_template.in") as templ_file:
-                    templ_content = templ_file.readlines()
-                    target_content = target_content + templ_content
-                    target_file.writelines(target_content)
-                    print("write file: {}".format(target_path))
+            fileUtility.copyfilePrepend("DEM/run_template.in" ,DEM_dir + "/run.in",target_content)
 
-             ###########################################################################
+            ###########################################################################
             # Create initNrun.sh
             #####################################################################################
             variables = {
             "numOfProcessor": numOfProcessor
             }
-            target_path = output_directory + "/" + "initNrun.sh"
-            with open(target_path, "w") as target_file:
-                with open("initNrun_template.sh") as templ_file:
-                    target_content = templ_file.read()
-                    for key, val in variables.items():
-                        target_content = target_content.replace(f"{{{key}}}", str(val))
-                    target_file.write(target_content)
-                    print("write file: {}".format(target_path))
+            fileUtility.copyfile("initNrun_template.sh", output_directory + "/" + "initNrun.sh", variables)

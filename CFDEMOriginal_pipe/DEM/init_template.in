@@ -1,0 +1,16 @@
+##### Header for General commands #####
+atom_style granular
+boundary m m f 
+units si
+communicate single vel yes
+newton off 
+
+##### Definition of simulationbox #####
+read_data walltexture.dat
+neighbor	0.00024 bin
+neigh_modify	delay 0
+
+##### write restart #####
+shell mkdir restart
+write_restart    ./restart/liggghts.restart_0
+
