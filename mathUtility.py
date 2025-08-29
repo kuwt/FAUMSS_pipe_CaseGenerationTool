@@ -3,6 +3,7 @@ import os
 import glob
 import random
 import math
+import numpy as np
 # prime number, adapted from Chatgpt
 def is_prime(n):
     """Checks if a number is prime using trial division."""

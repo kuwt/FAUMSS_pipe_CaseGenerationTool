@@ -34,7 +34,7 @@ def copyfile(src, dst, replaceDict = {}):
             for key, val in replaceDict.items():
                 target_content = target_content.replace(f"{{{key}}}", str(val))
             target_file.write(target_content)
-            print("write file: {}".format(target_path))
+            print("write file: {}".format(dst))
 
 def copyfilePrepend(src, dst, prependContent):
     with open(dst, "w") as target_file:
@@ -42,4 +42,4 @@ def copyfilePrepend(src, dst, prependContent):
             templ_content = templ_file.readlines()
             target_content = prependContent + templ_content
             target_file.writelines(target_content)
-            print("write file: {}".format(target_path))
+            print("write file: {}".format(dst))

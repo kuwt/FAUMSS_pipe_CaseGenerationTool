@@ -3,7 +3,9 @@ import os
 import glob
 import random
 import math
-
+import numpy as np
+import mathUtility
+import getA
 def cvrtSpeciesID_LiggghtsToPython(SpeciesID):
     return SpeciesID - 1
 def cvrtSpeciesID_PythonToLiggghts(SpeciesID):
@@ -23,20 +25,20 @@ def computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, YoungsMo
             Geff = 0.5/((2.0-PoissonRatio)*(1.0+PoissonRatio)/YoungsModulus + (2.0-PoissonRatio)*(1.0+PoissonRatio)/YoungsModulus)
             if(i==pipeSpecies): # infinite mass, infinite radius
                 Reff = RadiusArray[j]
-                Meff = DensityArray[j]*computeSphereVolume(RadiusArray[j])  
+                Meff = DensityArray[j]*mathUtility.computeSphereVolume(RadiusArray[j])  
             elif(j==pipeSpecies):
                 Reff = RadiusArray[i]
-                Meff = DensityArray[i]*computeSphereVolume(RadiusArray[i])
+                Meff = DensityArray[i]*mathUtility.computeSphereVolume(RadiusArray[i])
             elif(i==textureSpecies): # infinite mass, finite radius
                 Reff = 1.0/(1.0/RadiusArray[i] + 1.0/RadiusArray[j])
-                Meff = DensityArray[j]*computeSphereVolume(RadiusArray[j])
+                Meff = DensityArray[j]*mathUtility.computeSphereVolume(RadiusArray[j])
             elif(j==textureSpecies):
                 Reff = 1.0/(1.0/RadiusArray[i] + 1.0/RadiusArray[j])
-                Meff = DensityArray[i]*computeSphereVolume(RadiusArray[i])
+                Meff = DensityArray[i]*mathUtility.computeSphereVolume(RadiusArray[i])
             else:
                 m = np.zeros((2,1))
-                m[0] = DensityArray[i]*computeSphereVolume(RadiusArray[i])
-                m[1] = DensityArray[j]*computeSphereVolume(RadiusArray[j])
+                m[0] = DensityArray[i]*mathUtility.computeSphereVolume(RadiusArray[i])
+                m[1] = DensityArray[j]*mathUtility.computeSphereVolume(RadiusArray[j])
                 Reff = 1.0/(1.0/RadiusArray[i] + 1.0/RadiusArray[j])
                 Meff = 1.0/(1.0/m[0] + 1.0/m[1])
             
