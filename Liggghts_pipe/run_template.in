@@ -35,6 +35,10 @@ fix frz1 walltexture freeze
 shell mkdir restart
 restart ${dumpstep} ./restart/restart.bk1 ./restart/restart.bk2
 
+################# Create screen output ################################################3
+thermo_style    custom step atoms
+thermo          ${dumpstep}
+
 #### Insertion step #####
 region reg cylinder z 0.0 0.0 ${piperadius} 0 ${pipelength} units box
 fix pts3 all particletemplate/sphere ${theseed0} atom_type 3 density constant ${particledensity3} radius constant ${particleradii3}
