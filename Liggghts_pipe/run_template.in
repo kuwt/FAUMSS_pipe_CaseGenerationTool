@@ -36,7 +36,7 @@ shell mkdir restart
 restart ${dumpstep} ./restart/restart.bk1 ./restart/restart.bk2
 
 ################# Create screen output ################################################3
-thermo_style    custom step atoms
+thermo_style    custom step atoms ke
 thermo          ${dumpstep}
 
 #### Insertion step #####
@@ -46,14 +46,14 @@ fix pts4 all particletemplate/sphere ${theseed1} atom_type 4 density constant ${
 fix pdd1 all particledistribution/discrete/massbased ${theseed2} 2 pts3 ${particlefraction3} pts4 ${particlefraction4}
 fix ins all insert/rate/region seed ${theseed3} distributiontemplate pdd1 maxattempt ${maxparticleinsert} nparticles ${realparticleinsert} particlerate ${insertionparticlerate} insert_every 10 &
 overlapcheck yes all_in yes vel uniform 0.0 0.0 -3.0 0.2 0.2 0.2 region reg
-run ${insertionstep}
+run ${insertionstep} upto
 unfix ins
 
 #### unrecorded simulation step #####
-run ${unrecordedsimulationstep}
+run ${unrecordedsimulationstep} upto
 
 #### recorded simulation step #####
 shell mkdir post
 dump dmp all custom/vtk ${dumpstep} post/particles_*.vtk id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius density 
-run ${simulationstep}
+run ${simulationstep} upto
 
