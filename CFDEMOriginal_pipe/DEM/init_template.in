@@ -7,7 +7,7 @@ newton off
 
 ##### Definition of simulationbox #####
 read_data walltexture.dat
-neighbor	0.00024 bin
+neighbor	0.001 bin
 neigh_modify	delay 0
 
 ##### write restart #####

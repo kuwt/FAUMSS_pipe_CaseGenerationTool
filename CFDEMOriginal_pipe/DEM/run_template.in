@@ -1,19 +1,6 @@
-log             ../DEM/log.liggghts
-thermo_log      ../DEM/post/thermo.txt
 
-#######################################################
-# Important variables    
-#######################################################
 
-variable particleradii333 equal 0.0016
-variable particlefraction333 equal 1.0
-variable particledensity33 equal 1180
-
-variable particleradii444 equal 0.0008
-variable particlefraction444 equal 0.0
-variable particledensity44 equal 1180
-
-#######################################################
+###############  General ####################
 
 atom_style      granular
 atom_modify     map array
@@ -23,155 +10,47 @@ boundary        m m f
 newton          off
 
 units           si
-processors      1 1 80
+processors      1 1 ${numOfProcessor}
 
 
 ################### read the restart file ####################
 read_restart    ../DEM/restart/liggghts.restart_*
 
-############# Create Time###################
-timestep        0.000005
+############# Dynamics fix ###################
+timestep ${dt}
+fix   gravi all gravity ${definedGravity} vector 0.0 -1.0 0.0
+fix             integr all nve/sphere
 
-############# Create Gravity###################
-fix             gravi all gravity 9.81 vector 0.0 -1.0 0.0
-
-
-############# neighbour data###################
-neighbor        0.001 bin
-neigh_modify    delay 0
-
-############ Create Geometry  #############################3
-fix cylwalls all wall/gran model hertz/stiffness tangential history primitive type 1 zcylinder 0.02815 0. 0.
-
-################## Pair style and Material properties ################
-#pair style
+################## Definition of the contact models  ################
 pair_style gran model hertz/stiffness tangential history limitForce on tangential_damping on
 pair_coeff      * *
 
-variable nparticletype equal 4 #1 -> Pipe, #2 -> Helix, #3..#n ->Particles
-#variables for material properties
-#Elastic constants kn, kt, Use_gamman=gamman*Meff*sqrt(Reff), Use_gammat=gammat*Meff*sqrt(Reff)
-variable kn11 equal 7.0741e+07 #N/m
-variable kt11 equal 9.1642e+07 #N/m
-variable gamman11 equal 1.6181e+08 #N*s/(kg*m)
-variable gammat11 equal 1.6181e+08 #N*s/(kg*m)
-variable kn12 equal 7.0741e+07 #N/m
-variable kt12 equal 9.1642e+07 #N/m
-variable gamman12 equal 9.4781e+09 #N*s/(kg*m)
-variable gammat12 equal 9.4781e+09 #N*s/(kg*m)
-variable kn13 equal 7.0741e+07 #N/m
-variable kt13 equal 9.1642e+07 #N/m
-variable gamman13 equal 9.2936e+07 #N*s/(kg*m)
-variable gammat13 equal 9.2936e+07 #N*s/(kg*m)
-variable kn14 equal 7.0741e+07 #N/m
-variable kt14 equal 9.1642e+07 #N/m
-variable gamman14 equal 3.7174e+08 #N*s/(kg*m)
-variable gammat14 equal 3.7174e+08 #N*s/(kg*m)
-variable kn21 equal 7.0741e+07 #N/m
-variable kt21 equal 9.1642e+07 #N/m
-variable gamman21 equal 9.4781e+09 #N*s/(kg*m)
-variable gammat21 equal 9.4781e+09 #N*s/(kg*m)
-variable kn22 equal 7.0741e+07 #N/m
-variable kt22 equal 9.1642e+07 #N/m
-variable gamman22 equal 1.6181e+10 #N*s/(kg*m)
-variable gammat22 equal 1.6181e+10 #N*s/(kg*m)
-variable kn23 equal 7.0741e+07 #N/m
-variable kt23 equal 9.1642e+07 #N/m
-variable gamman23 equal 1.5013e+08 #N*s/(kg*m)
-variable gammat23 equal 1.5013e+08 #N*s/(kg*m)
-variable kn24 equal 7.0741e+07 #N/m
-variable kt24 equal 9.1642e+07 #N/m
-variable gamman24 equal 5.3195e+08 #N*s/(kg*m)
-variable gammat24 equal 5.3195e+08 #N*s/(kg*m)
-variable kn31 equal 7.0741e+07 #N/m
-variable kt31 equal 9.1642e+07 #N/m
-variable gamman31 equal 9.2936e+07 #N*s/(kg*m)
-variable gammat31 equal 9.2936e+07 #N*s/(kg*m)
-variable kn32 equal 7.0741e+07 #N/m
-variable kt32 equal 9.1642e+07 #N/m
-variable gamman32 equal 1.5013e+08 #N*s/(kg*m)
-variable gammat32 equal 1.5013e+08 #N*s/(kg*m)
-variable kn33 equal 7.0741e+07 #N/m
-variable kt33 equal 9.1642e+07 #N/m
-variable gamman33 equal 1.6181e+08 #N*s/(kg*m)
-variable gammat33 equal 1.6181e+08 #N*s/(kg*m)
-variable kn34 equal 7.0741e+07 #N/m
-variable kt34 equal 9.1642e+07 #N/m
-variable gamman34 equal 4.3267e+08 #N*s/(kg*m)
-variable gammat34 equal 4.3267e+08 #N*s/(kg*m)
-variable kn41 equal 7.0741e+07 #N/m
-variable kt41 equal 9.1642e+07 #N/m
-variable gamman41 equal 3.7174e+08 #N*s/(kg*m)
-variable gammat41 equal 3.7174e+08 #N*s/(kg*m)
-variable kn42 equal 7.0741e+07 #N/m
-variable kt42 equal 9.1642e+07 #N/m
-variable gamman42 equal 5.3195e+08 #N*s/(kg*m)
-variable gammat42 equal 5.3195e+08 #N*s/(kg*m)
-variable kn43 equal 7.0741e+07 #N/m
-variable kt43 equal 9.1642e+07 #N/m
-variable gamman43 equal 4.3267e+08 #N*s/(kg*m)
-variable gammat43 equal 4.3267e+08 #N*s/(kg*m)
-variable kn44 equal 7.0741e+07 #N/m
-variable kt44 equal 9.1642e+07 #N/m
-variable gamman44 equal 6.4724e+08 #N*s/(kg*m)
-variable gammat44 equal 6.4724e+08 #N*s/(kg*m)
-#Sliding friction coefficient
-variable sfc11 equal 0.5
-variable sfc12 equal 0.5
-variable sfc13 equal 0.5
-variable sfc14 equal 0.5
-variable sfc21 equal 0.5
-variable sfc22 equal 0.5
-variable sfc23 equal 0.5
-variable sfc24 equal 0.5
-variable sfc31 equal 0.5
-variable sfc32 equal 0.5
-variable sfc33 equal 0.5
-variable sfc34 equal 0.5
-variable sfc41 equal 0.5
-variable sfc42 equal 0.5
-variable sfc43 equal 0.5
-variable sfc44 equal 0.5
-
-
-
+################## Material fix  ################
 fix m1 all property/global kn peratomtypepair ${nparticletype} ${kn11} ${kn12} ${kn13} ${kn14} ${kn21} ${kn22} ${kn23} ${kn24} ${kn31} ${kn32} ${kn33} ${kn34} ${kn41} ${kn42} ${kn43} ${kn44}
 fix m2 all property/global kt peratomtypepair ${nparticletype} ${kt11} ${kt12} ${kt13} ${kt14} ${kt21} ${kt22} ${kt23} ${kt24} ${kt31} ${kt32} ${kt33} ${kt34} ${kt41} ${kt42} ${kt43} ${kt44}
 fix m3 all property/global gamman peratomtypepair ${nparticletype} ${gamman11} ${gamman12} ${gamman13} ${gamman14} ${gamman21} ${gamman22} ${gamman23} ${gamman24} ${gamman31} ${gamman32} ${gamman33} ${gamman34} ${gamman41} ${gamman42} ${gamman43} ${gamman44}
 fix m4 all property/global gammat peratomtypepair ${nparticletype} ${gammat11} ${gammat12} ${gammat13} ${gammat14} ${gammat21} ${gammat22} ${gammat23} ${gammat24} ${gammat31} ${gammat32} ${gammat33} ${gammat34} ${gammat41} ${gammat42} ${gammat43} ${gammat44}
 fix m5 all property/global coefficientFriction peratomtypepair ${nparticletype} ${sfc11} ${sfc12} ${sfc13} ${sfc14} ${sfc21} ${sfc22} ${sfc23} ${sfc24} ${sfc31} ${sfc32} ${sfc33} ${sfc34} ${sfc41} ${sfc42} ${sfc43} ${sfc44}
 
-#################  Insert new particles ####################
-fix pts333 all particletemplate/sphere 10093 atom_type 3 density constant ${particledensity33} radius constant ${particleradii333}
-fix pts444 all particletemplate/sphere 12289 atom_type 4 density constant ${particledensity44} radius constant ${particleradii444}
+############ Geometry fix  #############################3
+fix cylwalls all wall/gran model hertz/stiffness tangential history primitive type 1 zcylinder ${piperadius} 0. 0.
 
-region          bc5 cylinder z 0.0 0 0.024 0.001 0.003 units box
-fix pdd5 all particledistribution/discrete 32452867 2 pts333 ${particlefraction333} pts444 ${particlefraction444}
-fix             ins5 all insert/pack  seed 100001 distributiontemplate pdd5 vel uniform 0. 0. 0.0 0.1 0.1 0.0 insert_every 1 overlapcheck yes all_in no volumefraction_region 0.5 region bc5
+#################  Insertion fix ####################
+region    bc5 cylinder z 0.0 0 ${particleInsertionDiskSize} 0.001 0.003 units box
+fix pts3 all particletemplate/sphere ${theseed0} atom_type 3 density constant ${particledensity3} radius constant ${particleradii3}
+fix pts4 all particletemplate/sphere ${theseed1} atom_type 4 density constant ${particledensity4} radius constant ${particleradii4}
+fix pdd5 all particledistribution/discrete ${theseed2}  2 pts3 ${particlefraction3} pts4 ${particlefraction4}
+fix             ins5 all insert/pack  seed ${theseed3}  distributiontemplate pdd5 vel uniform 0. 0. 0.0 0.1 0.1 0.0 insert_every 1 overlapcheck yes all_in no volumefraction_region ${particleInsertionDiskVolumeFraction} region bc5
 
-############### create cfd coupling ############################
+############### cfd coupling fix ############################
 fix             cfd all couple/cfd couple_every 1 mpi
-fix             cfd2 all couple/cfd/force #/implicit
+fix             cfd2 all couple/cfd/force/implicit
 
-#################  Create dynamics #############################################
-fix             integr all nve/sphere
 
-################# Create screen output ################################################3
-compute         centerOfMass all com
-#compute         dragtotal all reduce sum f_dragforce[1] f_dragforce[2] f_dragforce[3]
-compute         rke all erotate/sphere
-thermo_style    custom step atoms ke c_rke vol c_centerOfMass[3] #c_dragtotal[1] c_dragtotal[2] c_dragtotal[3]
-thermo          5
-thermo_modify   lost ignore norm no
-compute_modify  thermo_temp dynamic yes
-
-################ Create dump ###################3
-dump            dmpvtk all custom/vtk 4000 ../DEM/post/liggghts_restart_*.vtk id type x y z vx vy vz fx fy fz radius
-
-#################################### freeze pre generated structure ####################################
+#################################### fix freeze pre generated structure ####################################
 group helix1 type 2
 fix frz1 helix1 freeze
 
-
 ################## run ##########################
+dump            dmpvtk all custom/vtk ${dumpstep} ../DEM/post/liggghts_restart_*.vtk id type x y z vx vy vz fx fy fz radius
 run             1

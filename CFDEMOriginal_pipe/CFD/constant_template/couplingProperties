@@ -241,6 +241,6 @@ dividedProps
 
 "(twoWayMPIProps|M2MProps)"
 {
-    liggghtsPath "../DEM/in.liggghts_run";
+    liggghtsPath "../DEM/run.in";
 }
 // ************************************************************************* //

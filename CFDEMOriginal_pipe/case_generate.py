@@ -12,8 +12,8 @@ sys.path.append(os.path.abspath("../"))
 import loadJSONPara
 import helixWallTextureGenerator
 import defaultWallTextureGenerator
-import getA
 import mathUtility
+import fileUtility
 import liggghtsPipeUtility as lpu
 
 if __name__ == "__main__":
@@ -32,8 +32,6 @@ if __name__ == "__main__":
         numOfTrial = loadJSONPara.readwithdefault(json_file_path,"numOfTrial",1)
         timeStepSize = loadJSONPara.read(json_file_path,"timeStepSize")
         dumpTimeInteval = loadJSONPara.read(json_file_path,"dumpTimeInteval") 
-       # insertionTime = loadJSONPara.read(json_file_path,"insertionTime") 
-       # unrecordedSimulationTime = loadJSONPara.readwithdefault(json_file_path,"unrecordedSimulationTime", 0)
         simulationTime = loadJSONPara.read(json_file_path,"simulationTime")
         pipeRadius = loadJSONPara.read(json_file_path,"pipeRadius") 
         pipeLength = loadJSONPara.read(json_file_path,"pipeLength") 
@@ -54,6 +52,9 @@ if __name__ == "__main__":
         particleRadius = loadJSONPara.read(json_file_path,"particleRadius") 
         particleSolidFrac = loadJSONPara.read(json_file_path,"particleSolidFrac") 
 
+        particleInsertionDiskSize = loadJSONPara.read(json_file_path,"particleInsertionDiskSize") 
+        particleInsertionDiskVolumeFraction = loadJSONPara.read(json_file_path,"particleInsertionDiskVolumeFraction") 
+
         enableHelixWallTexture = loadJSONPara.readwithdefault(json_file_path,"enableHelixWallTexture",False) 
         if enableHelixWallTexture == True:
             helixAmplitude = loadJSONPara.read(json_file_path,"helixAmplitude") 
@@ -62,12 +63,15 @@ if __name__ == "__main__":
         fluidVelocity = loadJSONPara.read(json_file_path,"fluidVelocity")
         kinematicViscosity = loadJSONPara.read(json_file_path,"kinematicViscosity")
         gravity = loadJSONPara.read(json_file_path,"gravity")
+        fluidGridSizeXY = loadJSONPara.read(json_file_path,"fluidGridSizeXY")
+        fluidGridSizeZ = loadJSONPara.read(json_file_path,"fluidGridSizeZ")
+
         numOfProcessor = loadJSONPara.readwithdefault(json_file_path,"numOfProcessor",4) 
         ###########################################################################
         # Create random prime number base
         ######################################################################################
         numOfSeedsRequiredPerCase = 4
-        primeNumberDataBase = functionUtility.generate_prime_list(numOfTrial * numOfSeedsRequiredPerCase, 31, 500000)
+        primeNumberDataBase = mathUtility.generate_prime_list(numOfTrial * numOfSeedsRequiredPerCase, 31, 500000)
         print("primeNumberDataBase = {}".format(primeNumberDataBase))
         
         ###########################################################################
@@ -99,6 +103,8 @@ if __name__ == "__main__":
             fileUtility.copyfile("CFD/0_template/Us", CFD_0_dir + "Us")
             fileUtility.copyfile("CFD/0_template/p", CFD_0_dir + "p")
             fileUtility.copyfile("CFD/0_template/voidfraction", CFD_0_dir + "voidfraction")
+            fileUtility.copyfile("CFD/0_template/Ksl", CFD_0_dir + "Ksl")
+            fileUtility.copyfile("CFD/0_template/rho", CFD_0_dir + "rho")
             ###########################################################################
             # Create CFD/system
             #####################################################################################
@@ -106,12 +112,12 @@ if __name__ == "__main__":
             if not os.path.exists(CFD_system_dir):
                 os.mkdir(CFD_system_dir)
 
-            gridnumXY = math.ceil(2*pipeRadius/gridSizeXY)
-            print(gridnumXY)
+            gridnumXY = math.ceil(2*pipeRadius/fluidGridSizeXY)
+            print("gridnumXY = {}".format(gridnumXY))
             gridnumXYPart1 = math.ceil(gridnumXY/2)
             gridnumXYPart2 = math.ceil(gridnumXYPart1/2)
-            gridnumZ = math.ceil(pipeLength/gridSizeZ)
-            print(gridnumZ)
+            gridnumZ = math.ceil(pipeLength/fluidGridSizeZ)
+            print("gridnumZ = {}".format(gridnumZ))
              
             variables = {
             "pipeRadius": pipeRadius,
@@ -130,7 +136,9 @@ if __name__ == "__main__":
             }
             fileUtility.copyfile("CFD/system_template/decomposeParDict", CFD_system_dir + "decomposeParDict",variables)
             variables = {
-            "simulationTime":simulationTime
+            "simulationTime":simulationTime,
+            "timeStepSize":timeStepSize,
+            "dumpTimeInteval":dumpTimeInteval
             }
             fileUtility.copyfile("CFD/system_template/controlDict", CFD_system_dir + "controlDict",variables)
 
@@ -150,8 +158,16 @@ if __name__ == "__main__":
             "gravity":gravity
             }
             fileUtility.copyfile("CFD/constant_template/g", CFD_constant_dir + "g",variables)
-            fileUtility.copyfile("CFD/constant_template/couplingProperties", CFD_constant_dir + "couplingProperties",variables)
-            fileUtility.copyfile("CFD/constant_template/liggghtsCommands", CFD_constant_dir + "liggghtsCommands",variables)
+            fileUtility.copyfile("CFD/constant_template/couplingProperties", CFD_constant_dir + "couplingProperties")
+            fileUtility.copyfile("CFD/constant_template/liggghtsCommands", CFD_constant_dir + "liggghtsCommands")
+            
+            ###########################################################################
+            # Create DEM 
+            #####################################################################################
+            DEM_dir = output_directory + "/DEM/"
+            if not os.path.exists(DEM_dir):
+                os.mkdir(DEM_dir)
+            
             ###########################################################################
             # Create wall texture
             ######################################################################################
@@ -189,12 +205,7 @@ if __name__ == "__main__":
                             pipeLength,
                             textureDir)
 
-            ###########################################################################
-            # Create DEM 
-            #####################################################################################
-            DEM_dir = output_directory + "/DEM/"
-            if not os.path.exists(DEM_dir):
-                os.mkdir(DEM_dir)
+
             ###########################################################################
             # Create DEM/init.in
             #####################################################################################
@@ -208,7 +219,7 @@ if __name__ == "__main__":
             target_content.append("variable zmax equal {}\n".format(pipeLength+simulationBoxEpsilon))
             target_content.append("variable pipelength equal {}\n".format(pipeLength))
             target_content.append("variable piperadius equal {}\n".format(pipeRadius))
-
+               
             target_content.append( "################### variable definition finished #####################\n\n\n")
             fileUtility.copyfilePrepend("DEM/init_template.in" ,DEM_dir + "/init.in",target_content)
 
@@ -255,33 +266,28 @@ if __name__ == "__main__":
             target_content.append( "##### particle properties geo #######\n")
             for i in range(nparticletype):
                 if i >= particleSpecies:
-                    target_content.append("variable particleradii{} equal {}\n".format(cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
-                    target_content.append("variable particlefraction{} equal {}\n".format(cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
-                    target_content.append("variable particledensity{} equal {}\n".format(cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
+                    target_content.append("variable particleradii{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
+                    target_content.append("variable particlefraction{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
+                    target_content.append("variable particledensity{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
             
-            target_content.append( "##### particle number #######\n")
-            particleNum = 0
-            pipeVolume = np.pi * (pipeRadius **2 ) * pipeLength
-            for radius,solidFrac in zip(particleRadius,particleSolidFrac):
-                particleVolume = computeSphereVolume(radius)
-                particleNum += solidFrac * pipeVolume/particleVolume
-            particleNum = math.ceil(particleNum)
-            print("Total particleNum : {}".format(particleNum))
-            target_content.append("variable realparticleinsert equal {}\n".format(particleNum))
-            target_content.append("variable maxparticleinsert equal {}\n".format(particleNum*2))
-            target_content.append("variable insertionparticlerate equal {}\n".format(5 * math.ceil(particleNum/insertionTime))) #faster insertion
+            target_content.append( "##### particle insertion #######\n")
+            target_content.append("variable particleInsertionDiskSize equal {}\n".format(particleInsertionDiskSize))
+            target_content.append("variable particleInsertionDiskVolumeFraction equal {}\n".format(particleInsertionDiskVolumeFraction))
 
             target_content.append( "##### time #######\n")
             target_content.append("variable dt equal {}\n".format(timeStepSize))
             target_content.append("variable dumpstep equal {}\n".format(math.ceil(dumpTimeInteval/timeStepSize)))
-            target_content.append("variable insertionstep equal {}\n".format(math.ceil(insertionTime/timeStepSize)))
-            target_content.append("variable unrecordedsimulationstep equal {}\n".format(math.ceil(unrecordedSimulationTime/timeStepSize)))
             target_content.append("variable simulationstep equal {}\n".format(math.ceil(simulationTime/timeStepSize)))
 
+            target_content.append( "##### time #######\n")
+            target_content.append("variable definedGravity equal {}\n".format(gravity))
+            
             target_content.append( "##### seed #######\n")
             for i in range(numOfSeedsRequiredPerCase):
                 target_content.append("variable theseed{} equal {}\n".format(i,primeNumberDataBase[trialid * numOfSeedsRequiredPerCase + i]))
-        
+
+            target_content.append( "variable numOfProcessor equal {}\n".format(numOfProcessor))
+
             target_content.append( "################### variable definition finished #####################\n\n\n")
             fileUtility.copyfilePrepend("DEM/run_template.in" ,DEM_dir + "/run.in",target_content)
 
