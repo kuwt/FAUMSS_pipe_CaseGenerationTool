@@ -173,11 +173,11 @@ if __name__ == "__main__":
             ######################################################################################
             simulationBoxExtendFactor = 1.2
             simulationBoxEpsilon = 2e-15
-            textureRadius = particleRadius[textureSpecies]
-            textureDensity = particleDensity[textureSpecies]
-            textureAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(textureSpecies)
             textureDir = output_directory + "/DEM/"
             if enableHelixWallTexture == True:
+                textureRadius = particleRadius[textureSpecies]
+                textureDensity = particleDensity[textureSpecies]
+                textureAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(textureSpecies)
                 helixWallTextureGenerator.helixWallTextureGenerator(
                                 nparticletype, 
                                 helixAmplitude,
@@ -193,12 +193,15 @@ if __name__ == "__main__":
                                 0,
                                 textureDir)      
             else:
+                dummyAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(particleSpecies)
+                dummyRadius = particleRadius[particleSpecies]
+                dummyDensity = particleDensity[particleSpecies]
                 defaultWallTextureGenerator.defaultWallTextureGenerator( 
                             nparticletype, 
                             pipeLength,
-                            textureAtomtype,
-                            textureRadius,
-                            textureDensity,
+                            dummyAtomtype,
+                            dummyRadius,
+                            dummyDensity,
                             pipeRadius * simulationBoxExtendFactor,
                             pipeRadius * simulationBoxExtendFactor,
                             -simulationBoxEpsilon,

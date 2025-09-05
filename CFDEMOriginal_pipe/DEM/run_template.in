@@ -48,8 +48,8 @@ fix             cfd2 all couple/cfd/force/implicit
 
 
 #################################### fix freeze pre generated structure ####################################
-group helix1 type 2
-fix frz1 helix1 freeze
+group walltex type 2
+fix frz1 walltex freeze
 
 ################## run ##########################
 dump            dmpvtk all custom/vtk ${dumpstep} ../DEM/post/liggghts_restart_*.vtk id type x y z vx vy vz fx fy fz radius
