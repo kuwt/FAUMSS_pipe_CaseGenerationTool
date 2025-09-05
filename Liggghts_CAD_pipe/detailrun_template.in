@@ -34,21 +34,10 @@ restart ${dumpstep} ./restart/restart.bk1 ./restart/restart.bk2
 
 ################# Create screen output ################################################3
 thermo_style    custom step atoms ke
-thermo          ${dumpstep}
+thermo          ${detailDumpstep}
 
-#### dump step #####
+#### detail dump step #####
 shell mkdir post
-dump dmp all custom/vtk ${dumpstep} post/particles_*.vtk id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius density 
+dump dmp all custom/vtk ${detailDumpstep} post/particles_*.vtk id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius density 
 
-
-#### Insertion step #####
-#region reg cylinder z 0.0 0.0 ${piperadius} 0 ${pipelength} units box
-region reg mesh/tet file "./pipeVolumeAscii.vtk" scale 1 move 0 0 0 rotate 0 0 0
-fix pts3 all particletemplate/sphere ${theseed0} atom_type 3 density constant ${particledensity3} radius constant ${particleradii3}
-fix pts4 all particletemplate/sphere ${theseed1} atom_type 4 density constant ${particledensity4} radius constant ${particleradii4}
-fix pdd1 all particledistribution/discrete/massbased ${theseed2} 2 pts3 ${particlefraction3} pts4 ${particlefraction4}
-fix ins all insert/rate/region seed ${theseed3} distributiontemplate pdd1 maxattempt ${maxparticleinsert} nparticles ${realparticleinsert} particlerate ${insertionparticlerate} insert_every 10 &
-overlapcheck yes all_in yes vel uniform 0.0 0.0 -3.0 0.2 0.2 0.2 region reg
-
-run ${Simulationstep} upto
-
+run ${detailSimulationstep}

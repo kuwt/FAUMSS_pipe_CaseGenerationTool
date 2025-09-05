@@ -11,3 +11,6 @@ fi
 
 echo "main run"
 mpirun -np {numOfProcessor} lmp_auto -in run.in
+
+echo "detail run"
+mpirun -np {numOfProcessor} lmp_auto -in detailrun.in
