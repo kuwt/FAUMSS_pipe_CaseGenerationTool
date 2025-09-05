@@ -17,6 +17,82 @@ import getA
 import mathUtility
 import liggghtsPipeUtility as lpu
 
+
+def AddLiggghtsVariablePipeGeometry(variableContent):
+    target_content.append( "##### Geometry definition #######\n")
+    variableContent.append("variable pipelength equal {}\n".format(pipeLength))
+    variableContent.append("variable piperadius equal {}\n".format(pipeRadius))
+    target_content.append( "\n")
+    return variableContent
+
+def AddLiggghtsVariableParticleDef(variableContent):
+    variableContent.append( "##### particle definition #######\n")
+    variableContent.append( "variable nparticletype equal {} #{} -> Pipe, #{} -> Helix, #{}..#n ->Particles\n".format(nparticletype,pipeSpecies,textureSpecies,particleSpecies))
+
+    DensityArray = particleDensity
+    RadiusArray = particleRadius
+    kn_specified_Matrix,kt_specified_Matrix,gamman_specified_Matrix,gammat_specified_Matrix = \
+        lpu.computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, youngModulus,poissionRatio, coefficientOfRestitution, DensityArray, RadiusArray)
+    variableContent.append( "##### particle properties kn_specified #######\n")
+    for i in range(nparticletype):
+        for j in range(nparticletype): 
+            variableContent.append("variable kn{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),kn_specified_Matrix[i][j]))
+    variableContent.append( "##### particle properties kt_specified #######\n")
+    for i in range(nparticletype):
+        for j in range(nparticletype): 
+            variableContent.append("variable kt{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),kt_specified_Matrix[i][j]))
+    variableContent.append( "##### particle properties gamman_specified_Matrix #######\n")
+    for i in range(nparticletype):
+        for j in range(nparticletype): 
+            variableContent.append("variable gamman{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),gamman_specified_Matrix[i][j]))
+    variableContent.append( "##### particle properties gammat_specified_Matrix #######\n")
+    for i in range(nparticletype):
+        for j in range(nparticletype): 
+            variableContent.append("variable gammat{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),gammat_specified_Matrix[i][j]))
+    variableContent.append( "##### particle properties sliding friction #######\n")
+    for i in range(nparticletype):
+        for j in range(nparticletype): 
+            if i == pipeSpecies or j == pipeSpecies or i == textureSpecies or j == textureSpecies:
+                variableContent.append("variable sfc{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),particleWallfrictionCoeffient))
+            else:
+                variableContent.append("variable sfc{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),particleFrictionCoeffient))
+
+    for i in range(nparticletype):
+        if i >= particleSpecies:
+            variableContent.append("variable particleradii{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
+            variableContent.append("variable particlefraction{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
+            variableContent.append("variable particledensity{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
+    
+    particleNum = 0
+    pipeVolume = np.pi * (pipeRadius **2 ) * pipeLength
+    for radius,solidFrac in zip(particleRadius,particleSolidFrac):
+        particleVolume = mathUtility.computeSphereVolume(radius)
+        particleNum += solidFrac * pipeVolume/particleVolume
+    particleNum = math.ceil(particleNum)
+    print("Total particleNum : {}".format(particleNum))
+    variableContent.append("variable realparticleinsert equal {}\n".format(particleNum))
+    variableContent.append("variable maxparticleinsert equal {}\n".format(particleNum*2))
+    variableContent.append("variable insertionparticlerate equal {}\n".format(math.ceil(particleNum/(simulationTime * 0.05)))) #using only 1/20 simulation time to insert particles
+    variableContent.append( "\n")
+    return variableContent
+
+def AddLiggghtsTimeStepping(variableContent):
+    variableContent.append( "##### time stepping #######\n")
+    variableContent.append("variable dt equal {}\n".format(timeStepSize))
+    variableContent.append("variable dumpstep equal {}\n".format(round(dumpTimeInteval/timeStepSize),-1))
+    variableContent.append("variable Simulationstep equal {}\n".format(round(simulationTime/timeStepSize),-1))
+    variableContent.append("variable detailDumpstep equal {}\n".format(round(detailDumpTimeInteval/timeStepSize),-1))
+    variableContent.append("variable detailSimulationstep equal {}\n".format(round(detailSimulationTime/timeStepSize),-1))
+    variableContent.append( "\n")
+    return variableContent
+
+def AddLiggghtsSeed(variableContent):
+    variableContent.append( "##### seed #######\n")
+    for i in range(numOfSeedsRequiredPerCase):
+        variableContent.append("variable theseed{} equal {}\n".format(i,primeNumberDataBase[trialid * numOfSeedsRequiredPerCase + i]))   
+    variableContent.append( "\n")
+    return variableContent
+
 if __name__ == "__main__":
     ###########################################################################
     # Read parameters                             
@@ -33,9 +109,9 @@ if __name__ == "__main__":
         numOfTrial = loadJSONPara.readwithdefault(json_file_path,"numOfTrial",1)
         timeStepSize = loadJSONPara.read(json_file_path,"timeStepSize")
         dumpTimeInteval = loadJSONPara.read(json_file_path,"dumpTimeInteval") 
-        insertionTime = loadJSONPara.read(json_file_path,"insertionTime") 
-        unrecordedSimulationTime = loadJSONPara.readwithdefault(json_file_path,"unrecordedSimulationTime", 0)
         simulationTime = loadJSONPara.read(json_file_path,"simulationTime")
+        detailSimulationTime = loadJSONPara.read(json_file_path,"detailSimulationTime")
+        detailDumpTimeInteval = loadJSONPara.read(json_file_path,"detailDumpTimeInteval")
         pipeRadius = loadJSONPara.read(json_file_path,"pipeRadius") 
         pipeLength = loadJSONPara.read(json_file_path,"pipeLength") 
         particleFrictionCoeffient = loadJSONPara.read(json_file_path,"particleFrictionCoeffient") 
@@ -80,10 +156,10 @@ if __name__ == "__main__":
             ######################################################################################
             simulationBoxExtendFactor = 1.2
             simulationBoxEpsilon = 2e-15
-            textureRadius = particleRadius[textureSpecies]
-            textureDensity = particleDensity[textureSpecies]
-            textureAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(textureSpecies)
             if enableHelixWallTexture == True:
+                textureRadius = particleRadius[textureSpecies]
+                textureDensity = particleDensity[textureSpecies]
+                textureAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(textureSpecies)
                 helixWallTextureGenerator.helixWallTextureGenerator(
                                 nparticletype, 
                                 helixAmplitude,
@@ -99,12 +175,15 @@ if __name__ == "__main__":
                                 0,
                                 output_directory)      
             else:
+                dummyAtomtype = lpu.cvrtSpeciesID_PythonToLiggghts(particleSpecies)
+                dummyRadius = particleRadius[particleSpecies]
+                dummyDensity = particleDensity[particleSpecies]
                 defaultWallTextureGenerator.defaultWallTextureGenerator( 
                             nparticletype, 
                             pipeLength,
-                            textureAtomtype,
-                            textureRadius,
-                            textureDensity,
+                            dummyAtomtype,
+                            dummyRadius,
+                            dummyDensity,
                             pipeRadius * simulationBoxExtendFactor,
                             pipeRadius * simulationBoxExtendFactor,
                             -simulationBoxEpsilon,
@@ -114,17 +193,7 @@ if __name__ == "__main__":
             # Create init.in
             #####################################################################################
             target_content = []
-            target_content.append( "################### variable definition start #####################\n")
-            target_content.append("variable xmin equal {}\n".format(-pipeRadius * simulationBoxExtendFactor))
-            target_content.append("variable xmax equal {}\n".format(pipeRadius * simulationBoxExtendFactor))
-            target_content.append("variable ymin equal {}\n".format(-pipeRadius * simulationBoxExtendFactor))
-            target_content.append("variable ymax equal {}\n".format(pipeRadius * simulationBoxExtendFactor))
-            target_content.append("variable zmin equal {}\n".format(-simulationBoxEpsilon))
-            target_content.append("variable zmax equal {}\n".format(pipeLength+simulationBoxEpsilon))
-            target_content.append("variable pipelength equal {}\n".format(pipeLength))
-            target_content.append("variable piperadius equal {}\n".format(pipeRadius))
-
-            target_content.append( "################### variable definition finished #####################\n\n\n")
+            target_content = AddLiggghtsVariablePipeGeometry(target_content)
           
             target_path = output_directory + "/init.in"
             with open(target_path, "w") as target_file:
@@ -137,76 +206,31 @@ if __name__ == "__main__":
             # Create run.in
             #####################################################################################
             target_content = []
-            target_content.append( "################### variable definition start #####################\n")
-            target_content.append( "##### Geometry definition #######\n")
-            target_content.append("variable pipelength equal {}\n".format(pipeLength))
-            target_content.append("variable piperadius equal {}\n".format(pipeRadius))
+            target_content = AddLiggghtsVariablePipeGeometry(target_content)
+            target_content = AddLiggghtsVariableParticleDef(target_content)
+            target_content = AddLiggghtsTimeStepping(target_content)
+            target_content = AddLiggghtsSeed(target_content)
 
-            target_content.append( "##### particle definition #######\n")
-            target_content.append( "variable nparticletype equal {} #{} -> Pipe, #{} -> Helix, #{}..#n ->Particles\n".format(nparticletype,pipeSpecies,textureSpecies,particleSpecies))
-   
-            DensityArray = particleDensity
-            RadiusArray = particleRadius
-            kn_specified_Matrix,kt_specified_Matrix,gamman_specified_Matrix,gammat_specified_Matrix = \
-                lpu.computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, youngModulus,poissionRatio, coefficientOfRestitution, DensityArray, RadiusArray)
-            target_content.append( "##### particle properties kn_specified #######\n")
-            for i in range(nparticletype):
-                for j in range(nparticletype): 
-                    target_content.append("variable kn{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),kn_specified_Matrix[i][j]))
-            target_content.append( "##### particle properties kt_specified #######\n")
-            for i in range(nparticletype):
-                for j in range(nparticletype): 
-                    target_content.append("variable kt{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),kt_specified_Matrix[i][j]))
-            target_content.append( "##### particle properties gamman_specified_Matrix #######\n")
-            for i in range(nparticletype):
-                for j in range(nparticletype): 
-                    target_content.append("variable gamman{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),gamman_specified_Matrix[i][j]))
-            target_content.append( "##### particle properties gammat_specified_Matrix #######\n")
-            for i in range(nparticletype):
-                for j in range(nparticletype): 
-                    target_content.append("variable gammat{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),gammat_specified_Matrix[i][j]))
-            target_content.append( "##### particle properties sliding friction #######\n")
-            for i in range(nparticletype):
-                for j in range(nparticletype): 
-                    if i == pipeSpecies or j == pipeSpecies or i == textureSpecies or j == textureSpecies:
-                        target_content.append("variable sfc{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),particleWallfrictionCoeffient))
-                    else:
-                        target_content.append("variable sfc{}{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),lpu.cvrtSpeciesID_PythonToLiggghts(j),particleFrictionCoeffient))
-
-            target_content.append( "##### particle properties geo #######\n")
-            for i in range(nparticletype):
-                if i >= particleSpecies:
-                    target_content.append("variable particleradii{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
-                    target_content.append("variable particlefraction{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
-                    target_content.append("variable particledensity{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
-            
-            target_content.append( "##### particle number #######\n")
-            particleNum = 0
-            pipeVolume = np.pi * (pipeRadius **2 ) * pipeLength
-            for radius,solidFrac in zip(particleRadius,particleSolidFrac):
-                particleVolume = mathUtility.computeSphereVolume(radius)
-                particleNum += solidFrac * pipeVolume/particleVolume
-            particleNum = math.ceil(particleNum)
-            print("Total particleNum : {}".format(particleNum))
-            target_content.append("variable realparticleinsert equal {}\n".format(particleNum))
-            target_content.append("variable maxparticleinsert equal {}\n".format(particleNum*2))
-            target_content.append("variable insertionparticlerate equal {}\n".format(5 * math.ceil(particleNum/insertionTime))) #faster insertion
-
-            target_content.append( "##### time #######\n")
-            target_content.append("variable dt equal {}\n".format(timeStepSize))
-            target_content.append("variable dumpstep equal {}\n".format(math.ceil(dumpTimeInteval/timeStepSize)))
-            target_content.append("variable insertionstep equal {}\n".format(math.ceil(insertionTime/timeStepSize)))
-            target_content.append("variable unrecordedsimulationstep equal {}\n".format(math.ceil(unrecordedSimulationTime/timeStepSize)))
-            target_content.append("variable simulationstep equal {}\n".format(math.ceil(simulationTime/timeStepSize)))
-
-            target_content.append( "##### seed #######\n")
-            for i in range(numOfSeedsRequiredPerCase):
-                target_content.append("variable theseed{} equal {}\n".format(i,primeNumberDataBase[trialid * numOfSeedsRequiredPerCase + i]))
-        
-            target_content.append( "################### variable definition finished #####################\n\n\n")
             target_path = output_directory + "/run.in" 
             with open(target_path, "w") as target_file:
                 with open("run_template.in") as templ_file:
+                    templ_content = templ_file.readlines()
+                    target_content = target_content + templ_content
+                    target_file.writelines(target_content)
+                    print("write file: {}".format(target_path))
+
+            ###########################################################################
+            # Create detailrun.in
+            #####################################################################################
+            target_content = []
+            target_content = AddLiggghtsVariablePipeGeometry(target_content)
+            target_content = AddLiggghtsVariableParticleDef(target_content)
+            target_content = AddLiggghtsTimeStepping(target_content)
+            target_content = AddLiggghtsSeed(target_content)
+
+            target_path = output_directory + "/detailrun.in" 
+            with open(target_path, "w") as target_file:
+                with open("detailrun_template.in") as templ_file:
                     templ_content = templ_file.readlines()
                     target_content = target_content + templ_content
                     target_file.writelines(target_content)
