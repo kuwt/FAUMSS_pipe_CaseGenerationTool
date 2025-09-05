@@ -62,7 +62,8 @@ def AddLiggghtsVariableParticleDef(variableContent):
             variableContent.append("variable particleradii{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleRadius[i]))
             variableContent.append("variable particlefraction{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleSolidFrac[i]/sum(particleSolidFrac)))
             variableContent.append("variable particledensity{} equal {}\n".format(lpu.cvrtSpeciesID_PythonToLiggghts(i),particleDensity[i]))
-    
+    return variableContent
+def AddLiggghtsVariableParticleInsertion(variableContent):    
     particleNum = 0
     pipeVolume = np.pi * (pipeRadius **2 ) * pipeLength
     for radius,solidFrac in zip(particleRadius,particleSolidFrac):
@@ -208,6 +209,7 @@ if __name__ == "__main__":
             target_content = []
             target_content = AddLiggghtsVariablePipeGeometry(target_content)
             target_content = AddLiggghtsVariableParticleDef(target_content)
+            target_content = AddLiggghtsVariableParticleInsertion(target_content)
             target_content = AddLiggghtsTimeStepping(target_content)
             target_content = AddLiggghtsSeed(target_content)
 
