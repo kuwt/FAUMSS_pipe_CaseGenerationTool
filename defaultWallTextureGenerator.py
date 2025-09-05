@@ -33,12 +33,13 @@ def defaultWallTextureGenerator(
     target_path = output_dir + "/walltexture.dat"
     with open(target_path, "w") as f:
         f.write("LIGGGHTS data file\n\n")
-        f.write(f"0 atoms\n\n")
+        f.write(f"1 atoms\n\n")  #movable atom
         f.write(f"{totalNumberOfAtomTypes} atom types\n\n")
         f.write(f"{-boxxHalfSize:.9f} {boxxHalfSize:.9f} xlo xhi\n")
         f.write(f"{-boxyHalfSize:.9f} {boxyHalfSize:.9f} ylo yhi\n")
         f.write(f"{boxzlo} {boxzhi:.9f} zlo zhi\n\n")
-      
+        f.write("Atoms\n\n")
+        f.write(f"{1} {textureAtomtype} {textureRadius*2:.9f} " f"{textureDensity:.9f} 0 0 0\n")
         print("write file: {}".format(target_path))
     # ---------------------------
     # Export 2: walltexture.in
