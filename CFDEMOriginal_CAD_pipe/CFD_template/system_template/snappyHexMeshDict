@@ -107,13 +107,13 @@ castellatedMeshControls
                 inlet          // Named region in the STL file
                 {
                     level (1 1);
-                    patchInfo{ type wall; } 
+                    patchInfo{ type patch; } 
                 }
 
                 outlet          // Named region in the STL file
                 {
                     level (1 1);
-                    patchInfo {type wall;} 
+                    patchInfo {type patch;} 
                 }
 
                 pipewall          // Named region in the STL file

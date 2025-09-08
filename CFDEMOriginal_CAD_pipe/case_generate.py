@@ -275,7 +275,7 @@ if __name__ == "__main__":
             # Create DEM/run.in
             #####################################################################################
             target_content = []
-             def AddLiggghtsSeed(variableContent):
+            def AddLiggghtsSeed(variableContent):
                 variableContent.append( "##### seed #######\n")
                 for i in range(numOfSeedsRequiredPerCase):
                     variableContent.append("variable theseed{} equal {}\n".format(i,primeNumberDataBase[trialid * numOfSeedsRequiredPerCase + i]))   

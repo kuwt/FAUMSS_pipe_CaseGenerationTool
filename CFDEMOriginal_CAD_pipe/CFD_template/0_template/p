@@ -21,7 +21,7 @@ internalField   uniform 101325;
 boundaryField
 {
 
-    wall
+    pipewall
     {
         type            zeroGradient;
     }
