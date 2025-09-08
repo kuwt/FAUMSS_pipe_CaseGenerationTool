@@ -99,12 +99,12 @@ if __name__ == "__main__":
         "fluidVelocity": fluidVelocity
         }
         
-        fileUtility.copyfile("CFD/0_template/U", CFD_0_dir + "U", variables)
-        fileUtility.copyfile("CFD/0_template/Us", CFD_0_dir + "Us")
-        fileUtility.copyfile("CFD/0_template/p", CFD_0_dir + "p")
-        fileUtility.copyfile("CFD/0_template/voidfraction", CFD_0_dir + "voidfraction")
-        fileUtility.copyfile("CFD/0_template/Ksl", CFD_0_dir + "Ksl")
-        fileUtility.copyfile("CFD/0_template/rho", CFD_0_dir + "rho")
+        fileUtility.copyfile("CFD_template/0_template/U", CFD_0_dir + "U", variables)
+        fileUtility.copyfile("CFD_template/0_template/Us", CFD_0_dir + "Us")
+        fileUtility.copyfile("CFD_template/0_template/p", CFD_0_dir + "p")
+        fileUtility.copyfile("CFD_template/0_template/voidfraction", CFD_0_dir + "voidfraction")
+        fileUtility.copyfile("CFD_template/0_template/Ksl", CFD_0_dir + "Ksl")
+        fileUtility.copyfile("CFD_template/0_template/rho", CFD_0_dir + "rho")
         ###########################################################################
         # Create CFD/system
         #####################################################################################
@@ -123,22 +123,22 @@ if __name__ == "__main__":
         "fluidGridSizeXY": fluidGridSizeXY,
         "fluidGridSizeZ": fluidGridSizeZ
         }
-        fileUtility.copyfile("CFD/system_template/blockMeshDict", CFD_system_dir + "blockMeshDict", variables)
-        fileUtility.copyfile("CFD/system_template/fvSchemes", CFD_system_dir + "fvSchemes")
-        fileUtility.copyfile("CFD/system_template/fvSolution", CFD_system_dir + "fvSolution")
+        fileUtility.copyfile("CFD_template/system_template/blockMeshDict", CFD_system_dir + "blockMeshDict", variables)
+        fileUtility.copyfile("CFD_template/system_template/fvSchemes", CFD_system_dir + "fvSchemes")
+        fileUtility.copyfile("CFD_template/system_template/fvSolution", CFD_system_dir + "fvSolution")
         variables = {
         "numOfProcessor":numOfProcessor
         }
-        fileUtility.copyfile("CFD/system_template/decomposeParDict", CFD_system_dir + "decomposeParDict",variables)
+        fileUtility.copyfile("CFD_template/system_template/decomposeParDict", CFD_system_dir + "decomposeParDict",variables)
         variables = {
         "simulationTime":simulationTime,
         "timeStepSize":timeStepSize,
         "dumpTimeInteval":dumpTimeInteval
         }
-        fileUtility.copyfile("CFD/system_template/controlDict", CFD_system_dir + "controlDict",variables)
-        fileUtility.copyfile("CFD/system_template/meshQualityDict", CFD_system_dir + "meshQualityDict")
-        fileUtility.copyfile("CFD/system_template/surfaceFeaturesDict", CFD_system_dir + "surfaceFeaturesDict")
-        fileUtility.copyfile("CFD/system_template/snappyHexMeshDict", CFD_system_dir + "snappyHexMeshDict")
+        fileUtility.copyfile("CFD_template/system_template/controlDict", CFD_system_dir + "controlDict",variables)
+        fileUtility.copyfile("CFD_template/system_template/meshQualityDict", CFD_system_dir + "meshQualityDict")
+        fileUtility.copyfile("CFD_template/system_template/surfaceFeaturesDict", CFD_system_dir + "surfaceFeaturesDict")
+        fileUtility.copyfile("CFD_template/system_template/snappyHexMeshDict", CFD_system_dir + "snappyHexMeshDict")
         
         ###########################################################################
         # Create CFD/constant
@@ -146,18 +146,18 @@ if __name__ == "__main__":
         CFD_constant_dir = CFD_dir + "/constant/"
         if not os.path.exists(CFD_constant_dir):
             os.mkdir(CFD_constant_dir)
-        fileUtility.copyfile("CFD/constant_template/turbulenceProperties", CFD_constant_dir + "turbulenceProperties")
+        fileUtility.copyfile("CFD_template/constant_template/turbulenceProperties", CFD_constant_dir + "turbulenceProperties")
         variables = {
         "kinematicViscosity":kinematicViscosity
         }
-        fileUtility.copyfile("CFD/constant_template/transportProperties", CFD_constant_dir + "transportProperties",variables)
+        fileUtility.copyfile("CFD_template/constant_template/transportProperties", CFD_constant_dir + "transportProperties",variables)
 
         variables = {
         "gravity":gravity
         }
-        fileUtility.copyfile("CFD/constant_template/g", CFD_constant_dir + "g",variables)
-        fileUtility.copyfile("CFD/constant_template/couplingProperties", CFD_constant_dir + "couplingProperties")
-        fileUtility.copyfile("CFD/constant_template/liggghtsCommands", CFD_constant_dir + "liggghtsCommands")
+        fileUtility.copyfile("CFD_template/constant_template/g", CFD_constant_dir + "g",variables)
+        fileUtility.copyfile("CFD_template/constant_template/couplingProperties", CFD_constant_dir + "couplingProperties")
+        fileUtility.copyfile("CFD_template/constant_template/liggghtsCommands", CFD_constant_dir + "liggghtsCommands")
 
         ###########################################################################
         # Create CAD
@@ -269,7 +269,7 @@ if __name__ == "__main__":
                 return variableContent
             target_content = AddLiggghtsVariablePipeGeometry(target_content)
             target_content = AddLiggghtsVariableParticleDef(target_content)
-            fileUtility.copyfilePrepend("DEM/init_template.in" ,DEM_dir + "/init.in",target_content)
+            fileUtility.copyfilePrepend("DEM_template/init_template.in" ,DEM_dir + "/init.in",target_content)
 
             ###########################################################################
             # Create DEM/run.in
@@ -300,7 +300,7 @@ if __name__ == "__main__":
             target_content.append( "variable numOfProcessor equal {}\n".format(numOfProcessor))
 
             target_content.append( "################### variable definition finished #####################\n\n\n")
-            fileUtility.copyfilePrepend("DEM/run_template.in" ,DEM_dir + "/run.in",target_content)
+            fileUtility.copyfilePrepend("DEM_template/run_template.in" ,DEM_dir + "/run.in",target_content)
 
             ###########################################################################
             # CFD
