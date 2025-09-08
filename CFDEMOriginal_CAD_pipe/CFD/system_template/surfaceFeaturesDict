@@ -1,0 +1,49 @@
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.0                                   |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+version  2.0;
+format   ascii;
+class       dictionary;
+object      surfaceFeatureExtractDict;
+}
+
+surface1
+{
+
+  surfaces ("surfacemesh.stl");
+  //surfaces ("surface1.stl" "surface2.stl");
+
+  // Identify a feature when angle between faces < includedAngle
+  // - 0  : selects no edges
+  // - 180: selects all edges
+  includedAngle   150;
+
+  subsetFeatures
+  {
+    // Keep nonManifold edges (edges with >2 connected faces)
+    nonManifoldEdges       yes;
+
+    // Keep open edges (edges with 1 connected face)
+    openEdges       yes;
+  }
+
+  // Write features to obj format for postprocessing
+  writeObj                yes;
+  verboseObj              no;
+
+  // Write surface proximity and curvature fields to vtk format
+  // for postprocessing
+  writeVTK                no;
+
+}
+
+
+// ************************************************************************* //
