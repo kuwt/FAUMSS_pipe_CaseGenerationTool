@@ -33,39 +33,39 @@ def circle_points(center, normal, radius, n_points=20, include_endpoint=False):
     pts = np.roll(pts, -idx, axis=0)
     return pts
 
+# DEFAULT PARAMETER
+num_of_circle_points = 20
+helixradius = 0.005
+pitch = 0.1
+numOfPointsPerPitch = 15 # longer pitch requires more points, shorter pitch requires fewer points
+height = 0.5
+pipe_radius = 0.02815
+helixDirectionFactor = 1
+surfaceMeshSize = 0.005
+gradualTurnNum = 1
+output_directory = "."
+method = "robust"
 
-
-# helixradius = 0.001
-# pitch = 0.12
-# numOfPointsPerPitch = 15 # longer pitch requires more points, shorter pitch requires fewer points
-# height = 0.12
-# pipe_radius = 0.0067204
-# helixDirectionFactor = 1
-# surfaceMeshSize = 0.002
-# gradualTurnNum = 1
-# output_directory = "./aaa/"
-# method = "robust"
-
-
+# ############ read from json for input parameters #############
 import loadJSONPara
-############ read from json for input parameters #############
 try:
     json_file_path = sys.argv[1]
     print("load json path = {} ".format(json_file_path))
 except:
     raise("no json path")
 # # parameters (m)
-numOfPointsPerPitch = loadJSONPara.readwithdefault(json_file_path,"numOfPointsPerPitch",30) 
-helixradius = loadJSONPara.readwithdefault(json_file_path,"helixSpineAmplitude",0.005)  
-height = loadJSONPara.readwithdefault(json_file_path,"pipeLength",7) 
-pitch =loadJSONPara.readwithdefault(json_file_path,"helixSpinePeriod",0.159) 
+num_of_circle_points = loadJSONPara.readwithdefault(json_file_path,"numOfCirclePoints",num_of_circle_points) 
+numOfPointsPerPitch = loadJSONPara.readwithdefault(json_file_path,"numOfPointsPerPitch",numOfPointsPerPitch) 
+helixradius = loadJSONPara.readwithdefault(json_file_path,"helixSpineAmplitude",helixradius)  
+height = loadJSONPara.readwithdefault(json_file_path,"pipeLength",height) 
+pitch =loadJSONPara.readwithdefault(json_file_path,"helixSpinePeriod",pitch) 
 
-helixDirectionFactor = loadJSONPara.readwithdefault(json_file_path,"helixDirectionFactor",1) 
-pipe_radius = loadJSONPara.readwithdefault(json_file_path,"pipeRadius",0.02815) 
-surfaceMeshSize = loadJSONPara.readwithdefault(json_file_path,"surfaceMeshSize",0.006) 
-gradualTurnNum = loadJSONPara.readwithdefault(json_file_path,"gradualTurnNum",1) 
-output_directory = loadJSONPara.readwithdefault(json_file_path,"output_directory",".") 
-method = loadJSONPara.readwithdefault(json_file_path,"method","robust") 
+helixDirectionFactor = loadJSONPara.readwithdefault(json_file_path,"helixDirectionFactor",helixDirectionFactor) 
+pipe_radius = loadJSONPara.readwithdefault(json_file_path,"pipeRadius",pipe_radius) 
+surfaceMeshSize = loadJSONPara.readwithdefault(json_file_path,"surfaceMeshSize",surfaceMeshSize) 
+gradualTurnNum = loadJSONPara.readwithdefault(json_file_path,"gradualTurnNum",gradualTurnNum) 
+output_directory = loadJSONPara.readwithdefault(json_file_path,"output_directory",output_directory) 
+method = loadJSONPara.readwithdefault(json_file_path,"method",method) 
 
 ############ Salome starts #############
 geompy = geomBuilder.New()
@@ -78,6 +78,7 @@ geompy.addToStudy( OX, 'OX' )
 geompy.addToStudy( OY, 'OY' )
 geompy.addToStudy( OZ, 'OZ' )
 
+print("Constructing pipe spine")
 t_step = np.linspace(0, height/pitch * 2*np.pi, int(numOfPointsPerPitch * height/pitch))
 helixlocation = []
 for t in t_step:
@@ -109,7 +110,8 @@ for i,helixloc in enumerate(helixlocation):
 HelixCurve = geompy.MakePolyline(vertexList, False)
 geompy.addToStudy( HelixCurve, 'HelixCurve' )
 
-
+print("Constructing pipe wall")
+print("Number of cross sections = {}".format(len(helixlocation)))
 if method == "smooth": # maintain first order continuity  only for small theta(require the normal trick). For large theta many problems
     thetaConstrainstDegree = 15
     theta = math.atan(helixradius / (pitch/4)) * 180/np.pi
@@ -137,9 +139,7 @@ if method == "smooth": # maintain first order continuity  only for small theta(r
     first_circle_Face = faceList[0]
     geompy.addToStudy(first_circle_Face, 'first_circle_Face' )
 
-    O_axis_lastCircle = geompy.MakeVectorDXDYDZ(firstDerivativeList[-1][0], firstDerivativeList[-1][1], firstDerivativeList[-1][2])
-    last_circle = geompy.MakeCircle(vertexList[-1], O_axis_lastCircle, pipe_radius)
-    last_circle_Face = geompy.MakeFaceWires([last_circle], 1)
+    last_circle_Face = faceList[-1]
     geompy.addToStudy( last_circle_Face, 'last_circle_Face' )
 
 else:   #robust method but does not maintain first order continuity across different segment of the pipe
@@ -148,13 +148,12 @@ else:   #robust method but does not maintain first order continuity across diffe
     for i,vertex in enumerate(helixlocation):
         normal = firstDerivativeList[i]
         #using manual points instead of build in circle since creating filling requires carefully designed order of helix 
-        points = circle_points(vertex, normal, pipe_radius, n_points=20) 
+        points = circle_points(vertex, normal, pipe_radius, n_points=num_of_circle_points) 
         salome_points = [ geompy.MakeVertex(x,y,z) for (x,y,z) in points ]
         bspline = geompy.MakeInterpol(salome_points,True)    
         #geompy.addToStudy(bspline, "CircleBSpline_{}".format(i))
         circleList.append(bspline)
-        tmp_face = geompy.MakeFaceWires([bspline], 1)
-        faceList.append(tmp_face)
+
 
     fillingList = []
     for i,(circle,circleNext) in enumerate(zip(circleList,circleList[1:])):
@@ -165,21 +164,14 @@ else:   #robust method but does not maintain first order continuity across diffe
     HelixPipeWall = geompy.MakeFuseList(fillingList, True, True)
     geompy.addToStudy( HelixPipeWall, 'HelixPipeWall' )
 
-    # make the first circle face
-    first_circle_Face = faceList[0]
+    # make the end circle face
+    first_circle_Face = geompy.MakeFaceWires([circleList[0]], 1)
     geompy.addToStudy(first_circle_Face, 'first_circle_Face' )
+    last_circle_Face = geompy.MakeFaceWires([circleList[-1]], 1)
+    geompy.addToStudy(last_circle_Face, 'last_circle_Face' )
 
-    O_axis_lastCircle = geompy.MakeVectorDXDYDZ(firstDerivativeList[-1][0], firstDerivativeList[-1][1], firstDerivativeList[-1][2])
-    last_circle = geompy.MakeCircle(vertexList[-1], O_axis_lastCircle, pipe_radius)
-    last_circle_Face = geompy.MakeFaceWires([last_circle], 1)
-    geompy.addToStudy( last_circle_Face, 'last_circle_Face' )
-
-HelixPipeSurface = geompy.MakeFuseList([HelixPipeWall, first_circle_Face, last_circle_Face], True, True)
-geompy.addToStudy( HelixPipeSurface, 'HelixPipeSurface' )
-HelixPipeVolume = geompy.MakeSolid([HelixPipeSurface])
-geompy.addToStudy( HelixPipeVolume, 'HelixPipeVolume' )
-
-# save the pipe
+# save the raw pipe
+print("Saving raw pipe")
 path = output_directory + '/rawHelixPipeWall.vtk'
 try:
   geompy.ExportVTK(HelixPipeWall, path, 0.001)
@@ -187,11 +179,17 @@ try:
 except:
   print('ExportPartToSTL() failed. Invalid file name?')
 
+# Make Volume
+HelixPipeSurface = geompy.MakeFuseList([HelixPipeWall, first_circle_Face, last_circle_Face], True, True)
+geompy.addToStudy( HelixPipeSurface, 'HelixPipeSurface' )
+HelixPipeVolume = geompy.MakeSolid([HelixPipeSurface])
+geompy.addToStudy( HelixPipeVolume, 'HelixPipeVolume' )
+
 
 ###
 ### SMESH component
 ###
-
+print("Surface meshing")
 import  SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
 
@@ -264,7 +262,6 @@ try:
 except:
   print('ExportPartToSTL() failed. Invalid file name?')
 
-## Set names of Mesh objects
 smesh.SetName(NETGEN_2D_Parameters_1, 'NETGEN 2D Parameters_1')
 smesh.SetName(Mesh_1.GetMesh(), 'Mesh_1')
 smesh.SetName(inlet, 'inlet')
@@ -272,6 +269,8 @@ smesh.SetName(outlet, 'outlet')
 smesh.SetName(pipewall, 'pipewall')
 smesh.SetName(NETGEN_1D_2D.GetAlgorithm(), 'NETGEN 1D-2D')
 
+## Set names of Mesh objects
+print("Volume meshing")
 Mesh_2 = smesh.Mesh(HelixPipeVolume,'Mesh_2')
 NETGEN_1D_2D_3D = Mesh_2.Tetrahedron(algo=smeshBuilder.NETGEN_1D2D3D)
 isDone = Mesh_2.Compute()
