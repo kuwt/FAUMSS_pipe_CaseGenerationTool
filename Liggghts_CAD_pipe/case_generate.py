@@ -19,6 +19,8 @@ import mathUtility
 import liggghtsPipeUtility as lpu
 
 def AddLiggghtsVariablePipeGeometry(variableContent):
+    simulationBoxExtendFactor = 3.0
+    simulationBoxEpsilon = 2e-15
     variableContent.append( "##### Geometry definition #######\n")
     variableContent.append("variable xmin equal {}\n".format(-pipeRadius * simulationBoxExtendFactor))
     variableContent.append("variable xmax equal {}\n".format(pipeRadius * simulationBoxExtendFactor))
@@ -159,8 +161,7 @@ if __name__ == "__main__":
             output_directory = pathlib.Path(json_file_path).stem + "_{}".format(trialid)
             if not os.path.exists(output_directory):
                 os.mkdir(output_directory)
-            simulationBoxExtendFactor = 3.0
-            simulationBoxEpsilon = 2e-15
+
             ###########################################################################
             # Create init.in
             #####################################################################################
@@ -223,8 +224,12 @@ if __name__ == "__main__":
             tmpCADcfgpath = output_directory + "/tmpCADcfg.json"
             with open(tmpCADcfgpath, "w") as outfile:
                 outfile.write(json_object)
-            subprocess.run([salomePath,"-t","../constructHelixPipeSurfaceMeshSalome.py","args:{}".format(tmpCADcfgpath)])
-
+            print("running Salome")
+            
+            result = subprocess.run([salomePath,"-t","../constructHelixPipeSurfaceMeshSalome.py","args:{}".format(tmpCADcfgpath)])
+            if result.returncode != 0:
+                raise("running Salome fail")
+                
             import vtkconvert
             pipeVolumeBinary_path = output_directory + '/pipeVolumeBinary.vtk'
             pipeVolumeAscii_path = output_directory + '/pipeVolumeAscii.vtk'
