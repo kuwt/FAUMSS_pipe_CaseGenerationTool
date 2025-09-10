@@ -77,13 +77,16 @@ def AddLiggghtsVariableParticleInsertion(variableContent):
     variableContent.append( "\n")
     return variableContent
 
+def roundToTen(value):
+    return int(round(value,-1))
+
 def AddLiggghtsTimeStepping(variableContent):
     variableContent.append( "##### time stepping #######\n")
     variableContent.append("variable dt equal {}\n".format(timeStepSize))
-    variableContent.append("variable dumpstep equal {}\n".format(round(dumpTimeInteval/timeStepSize),-1))
-    variableContent.append("variable Simulationstep equal {}\n".format(round(simulationTime/timeStepSize),-1))
-    variableContent.append("variable detailDumpstep equal {}\n".format(round(detailDumpTimeInteval/timeStepSize),-1))
-    variableContent.append("variable detailSimulationstep equal {}\n".format(round(detailSimulationTime/timeStepSize),-1))
+    variableContent.append("variable dumpstep equal {}\n".format(roundToTen(dumpTimeInteval/timeStepSize)))
+    variableContent.append("variable Simulationstep equal {}\n".format(roundToTen(simulationTime/timeStepSize)))
+    variableContent.append("variable detailDumpstep equal {}\n".format(roundToTen(detailDumpTimeInteval/timeStepSize)))
+    variableContent.append("variable detailSimulationstep equal {}\n".format(roundToTen(detailSimulationTime/timeStepSize)))
     variableContent.append( "\n")
     return variableContent
 
