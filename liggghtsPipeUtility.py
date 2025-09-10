@@ -11,7 +11,7 @@ def cvrtSpeciesID_LiggghtsToPython(SpeciesID):
 def cvrtSpeciesID_PythonToLiggghts(SpeciesID):
     return SpeciesID + 1
         
-def computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, YoungsModulus, PoissonRatio, CoefficientOfRestitution, DensityArray, RadiusArray):
+def computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, YoungsModulus, PoissonRatio, CoefficientOfRestitution, CharacteristicVelocity, DensityArray, RadiusArray):
     speciesNum = nparticletype
     kn_specified_Matrix = np.zeros((speciesNum, speciesNum))
     kt_specified_Matrix = np.zeros((speciesNum, speciesNum))
@@ -44,7 +44,6 @@ def computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, YoungsMo
             
             # Need verification for the computation of A_n
             density = DensityArray[0]
-            CharacteristicVelocity = 0.1
             An =  getA.getAPhysical(CoefficientOfRestitution,Reff,Reff,density,YoungsModulus,PoissonRatio,CharacteristicVelocity)
             # https://www.cfdem.com/media/DEM/docu/gran_model_hertz_stiffness.html
             kn_specified_Matrix[i][j] = (4/3)* Yeff 

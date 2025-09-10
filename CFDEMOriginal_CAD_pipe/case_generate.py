@@ -37,9 +37,11 @@ if __name__ == "__main__":
         pipeLength = loadJSONPara.read(json_file_path,"pipeLength") 
         particleFrictionCoeffient = loadJSONPara.read(json_file_path,"particleFrictionCoeffient") 
         particleWallfrictionCoeffient = loadJSONPara.read(json_file_path,"particleWallfrictionCoeffient") 
+
         youngModulus = loadJSONPara.read(json_file_path,"youngModulus") 
         poissionRatio = loadJSONPara.read(json_file_path,"poissionRatio") 
         coefficientOfRestitution = loadJSONPara.read(json_file_path,"coefficientOfRestitution") 
+        characteristicVelocity= loadJSONPara.readwithdefault(json_file_path,"characteristicVelocity",1.0) 
         nparticletype = loadJSONPara.read(json_file_path,"nparticletype") 
         pipeSpecies = loadJSONPara.read(json_file_path,"pipeSpecies") 
         pipeSpecies = lpu.cvrtSpeciesID_LiggghtsToPython(pipeSpecies)
@@ -236,7 +238,7 @@ if __name__ == "__main__":
                 DensityArray = particleDensity
                 RadiusArray = particleRadius
                 kn_specified_Matrix,kt_specified_Matrix,gamman_specified_Matrix,gammat_specified_Matrix = \
-                    lpu.computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, youngModulus,poissionRatio, coefficientOfRestitution, DensityArray, RadiusArray)
+                    lpu.computeForceCoefficient(nparticletype, pipeSpecies, textureSpecies, youngModulus,poissionRatio, coefficientOfRestitution, characteristicVelocity, DensityArray, RadiusArray)
                 variableContent.append( "##### particle properties kn_specified #######\n")
                 for i in range(nparticletype):
                     for j in range(nparticletype): 
