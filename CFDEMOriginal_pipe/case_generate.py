@@ -279,8 +279,7 @@ if __name__ == "__main__":
 
             target_content.append( "##### time #######\n")
             target_content.append("variable dt equal {}\n".format(timeStepSize))
-            target_content.append("variable dumpstep equal {}\n".format(math.ceil(dumpTimeInteval/timeStepSize)))
-            target_content.append("variable simulationstep equal {}\n".format(math.ceil(simulationTime/timeStepSize)))
+            target_content.append("variable dumpstep equal {}\n".format(int(dumpTimeInteval/timeStepSize)))
 
             target_content.append( "##### time #######\n")
             target_content.append("variable definedGravity equal {}\n".format(gravity))
