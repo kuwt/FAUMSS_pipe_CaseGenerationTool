@@ -14,7 +14,7 @@ processors      1 1 ${numOfProcessor}
 
 
 ################### read the restart file ####################
-read_restart    ../DEM/restart/liggghts.restart_*
+read_restart    ../DEM/restart/liggghts.restart
 
 ############# Dynamics fix ###################
 timestep ${dt}

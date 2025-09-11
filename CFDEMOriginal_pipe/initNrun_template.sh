@@ -28,9 +28,9 @@ logfileName="log_$headerText"
 solverName="cfdemSolverPiso"
 nrProcs={numOfProcessor}
 #--------------------------------------------------------------------------------#
-
 #- liggghts, delete the last timestep since it might be corrupted, and there is no good ways to handle corruption.
 echo "delete last time step"
+cd $casePath/DEM/restart
 max=$(ls 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+)?' | sort -n | tail -n 1)
 echo "The last time step is:" $max
 if [[ -z "$max" ]]; then
@@ -66,6 +66,19 @@ for proc_dir in "$target_base"/processor*/; do
         fi
     done
 done
+
+#- liggghts restart file, not using liggghts built in directly since that only supports integer
+echo "copying liggghts restart file"
+cd $casePath/DEM/restart
+max=$(ls 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+)?' | sort -n | tail -n 1)
+if [[ -z "$max" ]]; then
+    echo "No file names with numbers found."
+    exit 1
+fi
+file_to_copy=$(ls | grep -F "$max" | head -n 1)
+echo "file to copy: $file_to_copy (number: $max)"
+cp "$file_to_copy" liggghts.restart
+echo "copy : $file_to_copy to liggghts.restart"
 
 
 # check if mesh was built
