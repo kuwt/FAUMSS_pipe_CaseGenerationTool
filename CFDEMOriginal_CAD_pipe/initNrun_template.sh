@@ -12,10 +12,15 @@ logfileName="log_$headerText"
 solverName="init.in"
 machineFileName="none"   # yourMachinefileName | none
 #--------------------------------------------------------------------------------#
-
-#- call function to run DEM case
-parDEMrun $logpath $logfileName $casePath $headerText $solverName 1 $machineFileName
-
+echo "checking liggghts restart file"
+cd $casePath/DEM/restart
+if find . -maxdepth 1 -type f -regex '.*/.*[0-9].*' | grep -q .; then
+    echo "skip dem init"
+else
+    #- call function to run DEM case
+    cd $casePath
+    parDEMrun $logpath $logfileName $casePath $headerText $solverName 1 $machineFileName
+fi
 #--------------------------------------------------------------------------------#
 #- define variables
 headerText="run_parallel_cfdemSolverPiso_CFDDEM"
@@ -25,46 +30,42 @@ nrProcs={numOfProcessor}
 #--------------------------------------------------------------------------------#
 
 #- liggghts, delete the last timestep since it might be corrupted, and there is no good ways to handle corruption.
-echo "checking liggghts restart file"
-cd $casePath/DEM/restart
-# Get the file with the highest number
-file=$(ls | grep -E '[0-9]+' | while read f; do
-    num=$(echo "$f" | grep -oE '[0-9]+' | tail -n1)
-    echo "$num $f"
-done | sort -k1,1n | tail -n1 | awk '{print $2}')
+echo "delete last time step"
+max=$(ls 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+)?' | sort -n | tail -n 1)
+echo "The last time step is:" $max
+if [[ -z "$max" ]]; then
+    echo "No files with numbers found."
+    exit 0
+fi
 
-# Extract the number
-num=$(echo "$file" | grep -oE '[0-9]+' | tail -n1)
+# Find the file(s) that contain this max number
+file_to_delete=$(ls | grep -F "$max" | head -n 1)
 
-# If the number > 0, delete the file
-if [ -n "$num" ] && [ "$num" -gt 0 ]; then
-    echo "Deleting: $file"
-    rm -- "$file"
+# Compare number > 0
+if (( $(echo "$max > 0" | bc -l) )); then
+    echo "Deleting file: $file_to_delete (because $max > 0)"
+    rm -f "$file_to_delete"
 else
-    echo "No file deleted."
+    echo "Max number $max is not greater than 0. No file deleted."
 fi
 
 #- openfoam, delete the last timestep too..
 echo "checking openfoam restart file"
-cd $casePath
-base="CFD/processor0"
-# Find folder with greatest number
-folder=$(ls -d "$base"/*/ 2>/dev/null | grep -Eo '[0-9]+/?$' | tr -d / | sort -n | tail -n1)
+target_base="$casePath/CFD/"
+for proc_dir in "$target_base"/processor*/; do
+    echo "Checking $proc_dir"
+    cd "$proc_dir" || continue
 
-# Check if we got a number
-if [ -n "$folder" ] && [ "$folder" -gt 0 ]; then
-    echo "Deleting folder number: $folder"
-    
-    # Loop through all processor directories and delete matching folder
-    for d in CFD/processor*/; do
-        if [ -d "$d/$folder" ]; then
-            echo "Deleting: $d/$folder"
-            rm -rf -- "$d/$folder"
+    for folder in */; do
+        num=$(echo "$folder" | grep -Eo '[0-9]+(\.[0-9]+)?')
+        if [[ -n "$num" ]]; then
+            if (( $(echo "$num >= $max" | bc -l) )); then
+                echo "Deleting $proc_dir$folder (because $num >= $max)"
+                rm -rf "$folder"
+            fi
         fi
     done
-else
-    echo "No folder deleted."
-fi
+done
 
 
 # check if mesh was built
