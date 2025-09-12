@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
         particleInsertionDiskSize = loadJSONPara.read(json_file_path,"particleInsertionDiskSize") 
         particleInsertionDiskVolumeFraction = loadJSONPara.read(json_file_path,"particleInsertionDiskVolumeFraction") 
+        particleInsertionVelocity = loadJSONPara.read(json_file_path,"particleInsertionVelocity") 
 
         salomePath = loadJSONPara.readwithdefault(json_file_path,"salomePath","/local_disk/tools/SALOME-9.13.0-native-UB20.04-SRC/salome")
         CADSurfaceMeshSize = loadJSONPara.read(json_file_path,"CADSurfaceMeshSize")
@@ -290,6 +291,7 @@ if __name__ == "__main__":
             target_content.append( "##### particle insertion #######\n")
             target_content.append("variable particleInsertionDiskSize equal {}\n".format(particleInsertionDiskSize))
             target_content.append("variable particleInsertionDiskVolumeFraction equal {}\n".format(particleInsertionDiskVolumeFraction))
+            target_content.append("variable particleInsertionVelocity equal {}\n".format(particleInsertionVelocity))
 
             target_content.append( "##### time #######\n")
             target_content.append("variable dt equal {}\n".format(timeStepSize))

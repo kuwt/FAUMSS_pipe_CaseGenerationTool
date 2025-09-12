@@ -41,7 +41,7 @@ region    bc5 cylinder z 0.0 0 ${particleInsertionDiskSize} 0.001 0.003 units bo
 fix pts3 all particletemplate/sphere ${theseed0} atom_type 3 density constant ${particledensity3} radius constant ${particleradii3}
 fix pts4 all particletemplate/sphere ${theseed1} atom_type 4 density constant ${particledensity4} radius constant ${particleradii4}
 fix pdd5 all particledistribution/discrete ${theseed2}  2 pts3 ${particlefraction3} pts4 ${particlefraction4}
-fix             ins5 all insert/pack  seed ${theseed3}  distributiontemplate pdd5 vel uniform 0. 0. 0.0 0.1 0.1 0.0 insert_every 1 overlapcheck yes all_in no volumefraction_region ${particleInsertionDiskVolumeFraction} region bc5
+fix             ins5 all insert/pack  seed ${theseed3}  distributiontemplate pdd5 vel uniform 0. 0. ${particleInsertionVelocity} 0.1 0.1 0.0 insert_every 1 overlapcheck yes all_in no volumefraction_region ${particleInsertionDiskVolumeFraction} region bc5
 
 ############### cfd coupling fix ############################
 fix             cfd all couple/cfd couple_every 1 mpi

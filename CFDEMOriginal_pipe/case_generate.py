@@ -55,6 +55,7 @@ if __name__ == "__main__":
 
         particleInsertionDiskSize = loadJSONPara.read(json_file_path,"particleInsertionDiskSize") 
         particleInsertionDiskVolumeFraction = loadJSONPara.read(json_file_path,"particleInsertionDiskVolumeFraction") 
+        particleInsertionVelocity = loadJSONPara.read(json_file_path,"particleInsertionVelocity") 
 
         enableHelixWallTexture = loadJSONPara.readwithdefault(json_file_path,"enableHelixWallTexture",False) 
         if enableHelixWallTexture == True:
@@ -277,7 +278,8 @@ if __name__ == "__main__":
             target_content.append( "##### particle insertion #######\n")
             target_content.append("variable particleInsertionDiskSize equal {}\n".format(particleInsertionDiskSize))
             target_content.append("variable particleInsertionDiskVolumeFraction equal {}\n".format(particleInsertionDiskVolumeFraction))
-
+            target_content.append("variable particleInsertionVelocity equal {}\n".format(particleInsertionVelocity))
+            
             target_content.append( "##### time #######\n")
             target_content.append("variable dt equal {}\n".format(timeStepSize))
             target_content.append("variable dumpstep equal {}\n".format(int(dumpTimeInteval/timeStepSize)))
