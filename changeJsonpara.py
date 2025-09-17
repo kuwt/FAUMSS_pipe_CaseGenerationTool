@@ -5,8 +5,7 @@ import pathlib
 import shutil
 import subprocess
 import glob
-
-
+import ast
 
 if __name__ == "__main__":
     try:
@@ -19,7 +18,7 @@ if __name__ == "__main__":
         parametertype = sys.argv[4]
         print("parametertype = {} ".format(parametertype))   
     except:
-        raise Exception("no json path specify as the first argument")
+        raise Exception("no 4 arguments")
 
     # operation on values
     if parametertype == "bool":
@@ -28,11 +27,8 @@ if __name__ == "__main__":
         else:
             parametervalue = False
 
-    if parametertype == "int":
-        parametervalue = int(parametervalue)
-
-    if parametertype == "float":
-        parametervalue = float(parametervalue)
+    if parametertype == "numerics":
+        parametervalue = ast.literal_eval(parametervalue)
 
     pathList = []
     for json_file_path in glob.glob(json_input_file_path ):
