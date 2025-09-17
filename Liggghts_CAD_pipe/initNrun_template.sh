@@ -9,8 +9,12 @@ else
     lmp_auto -in init.in
 fi
 
-echo "main run"
-mpirun -np {numOfProcessor} lmp_auto -in run.in
+if [ -f "./restart/restart.bkfinal" ]; then
+	echo "mainrun is done before. Skip mainrun."
+else
+	echo "main run"
+	mpirun -np {numOfProcessor} lmp_auto -in run.in
+fi
 
 echo "detail run"
 mpirun -np {numOfProcessor} lmp_auto -in detailrun.in

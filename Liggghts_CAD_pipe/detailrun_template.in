@@ -6,7 +6,7 @@ communicate single vel yes
 newton off
 
 ##### read restart #####
-read_restart    ./restart/restart.bk1
+read_restart    ./restart/restart.bkfinal
 
 ##### Dynamics fix #####
 timestep ${dt}
@@ -40,4 +40,4 @@ thermo          ${detailDumpstep}
 shell mkdir post
 dump dmp all custom/vtk ${detailDumpstep} post/particles_*.vtk id type type x y z ix iy iz vx vy vz fx fy fz omegax omegay omegaz radius density 
 
-run ${detailSimulationstep}
+run ${detailSimulationstep} upto
