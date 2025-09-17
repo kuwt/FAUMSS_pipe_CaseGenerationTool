@@ -8,8 +8,11 @@ import glob
 import random
 import math
 import numpy as np
-
-sys.path.append(os.path.abspath("../"))
+script_path = os.path.abspath(__file__)
+print("Script path:", script_path)
+script_dir = os.path.dirname(script_path)
+print("Script directory:", script_dir)
+sys.path.append(os.path.abspath(script_dir + "/../"))
 import loadJSONPara
 import helixWallTextureGenerator
 import defaultWallTextureGenerator

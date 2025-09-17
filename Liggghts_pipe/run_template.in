@@ -52,3 +52,4 @@ fix ins all insert/rate/region seed ${theseed3} distributiontemplate pdd1 maxatt
 overlapcheck yes all_in yes vel uniform 0.0 0.0 -3.0 0.2 0.2 0.2 region reg
 
 run ${Simulationstep} upto
+write_restart   ./restart/restart.bkfinal

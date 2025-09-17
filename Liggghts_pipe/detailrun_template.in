@@ -6,7 +6,7 @@ communicate single vel yes
 newton off
 
 ##### read restart #####
-read_restart    ./restart/restart.bk1
+read_restart    ./restart/restart.bkfinal
 
 ##### Dynamics fix #####
 timestep ${dt}
