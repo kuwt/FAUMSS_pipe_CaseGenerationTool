@@ -8,7 +8,11 @@ import glob
 import math
 import numpy as np
 
-sys.path.append(os.path.abspath("../"))
+script_path = os.path.abspath(__file__)
+print("Script path:", script_path)
+script_dir = os.path.dirname(script_path)
+print("Script directory:", script_dir)
+sys.path.append(os.path.abspath(script_dir + "/../"))
 import loadJSONPara
 import helixWallTextureGenerator
 import defaultWallTextureGenerator
@@ -168,35 +172,37 @@ if __name__ == "__main__":
         CADDir = CFD_constant_dir + "/triSurface/" 
         if not os.path.exists(CADDir):
             os.mkdir(CADDir)
-        json_template_dictionary = {
-            "helixSpineAmplitude":helixSpineAmplitude,
-            "pipeLength":pipeLength,
-            "helixSpinePeriod":helixSpinePeriod,
-            "pipeRadius":pipeRadius,
-            "surfaceMeshSize":CADSurfaceMeshSize,
-            "output_directory" : CADDir
-        }
-        json_object = json.dumps(json_template_dictionary, indent=4)
-        tmpCADcfgpath = output_directory + "/tmpCADcfg.json"
-        with open(tmpCADcfgpath, "w") as outfile:
-            outfile.write(json_object)
-        print("running Salome")
-        result = subprocess.run([salomePath,"-t","../constructHelixPipeSurfaceMeshSalome.py","args:{}".format(tmpCADcfgpath)])
-        if result.returncode != 0:
-            raise("running Salome fail")
+            json_template_dictionary = {
+                "helixSpineAmplitude":helixSpineAmplitude,
+                "pipeLength":pipeLength,
+                "helixSpinePeriod":helixSpinePeriod,
+                "pipeRadius":pipeRadius,
+                "surfaceMeshSize":CADSurfaceMeshSize,
+                "output_directory" : CADDir
+            }
+            json_object = json.dumps(json_template_dictionary, indent=4)
+            tmpCADcfgpath = output_directory + "/tmpCADcfg.json"
+            with open(tmpCADcfgpath, "w") as outfile:
+                outfile.write(json_object)
+            print("running Salome")
+            result = subprocess.run([salomePath,"-t","../constructHelixPipeSurfaceMeshSalome.py","args:{}".format(tmpCADcfgpath)])
+            if result.returncode != 0:
+                raise("running Salome fail")
 
-        fromSalomeMeshToOpenfoamMesh = """
-        cd {tmpDir}
-        cat inlet.stl outlet.stl pipewall.stl  > surfacemesh.stl
-        cd ../..
-        blockMesh | tee blockMesh.log
-        surfaceFeatures | tee surfaceFeatures.log
-        snappyHexMesh -overwrite| tee log.snappyHexMesh
-        """.format(tmpDir=CADDir)
+            fromSalomeMeshToOpenfoamMesh = """
+            cd {tmpDir}
+            cat inlet.stl outlet.stl pipewall.stl  > surfacemesh.stl
+            cd ../..
+            blockMesh | tee blockMesh.log
+            surfaceFeatures | tee surfaceFeatures.log
+            snappyHexMesh -overwrite| tee log.snappyHexMesh
+            """.format(tmpDir=CADDir)
 
-        result = subprocess.run(fromSalomeMeshToOpenfoamMesh,shell=True, executable="/bin/bash", check=True)
-        if result.returncode != 0:
-            raise("fromSalomeMeshToOpenfoamMesh fail")
+            result = subprocess.run(fromSalomeMeshToOpenfoamMesh,shell=True, executable="/bin/bash", check=True)
+            if result.returncode != 0:
+                raise("fromSalomeMeshToOpenfoamMesh fail")
+        else:
+            print("CADDir:{} already exist. Skip remaking CAD since this takes a long time!".format(CADDir))
         ###########################################################################
         # of trials
         #####################################################################################

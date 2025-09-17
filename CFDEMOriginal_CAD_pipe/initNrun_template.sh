@@ -31,11 +31,13 @@ nrProcs={numOfProcessor}
 #- liggghts, delete the last timestep since it might be corrupted, and there is no good ways to handle corruption.
 echo "delete last time step"
 cd $casePath/DEM/restart
-max=$(ls 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+)?' | sort -n | tail -n 1)
-echo "The last time step is:" $max
-if [[ -z "$max" ]]; then
-    echo "No files with numbers found."
-    exit 0
+if [ $? -eq 0 ]; then
+	max=$(ls 2>/dev/null | grep -Eo '[0-9]+(\.[0-9]+)?' | sort -n | tail -n 1)
+	echo "The last time step is:" $max
+	if [[ -z "$max" ]]; then
+	    echo "No files with numbers found."
+	    exit 0
+	fi
 fi
 
 # Find the file(s) that contain this max number
