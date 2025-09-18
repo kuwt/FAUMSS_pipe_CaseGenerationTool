@@ -14,7 +14,7 @@ machineFileName="none"   # yourMachinefileName | none
 #--------------------------------------------------------------------------------#
 echo "checking liggghts restart file"
 cd $casePath/DEM/restart
-if find . -maxdepth 1 -type f -regex '.*/.*[0-9].*' | grep -q .; then
+if [ $? -eq 0 ] && find . -maxdepth 1 -type f -regex '.*/.*[0-9].*' | grep -q .; then
     echo "skip dem init"
 else
     #- call function to run DEM case
@@ -61,7 +61,7 @@ for proc_dir in "$target_base"/processor*/; do
     for folder in */; do
         num=$(echo "$folder" | grep -Eo '[0-9]+(\.[0-9]+)?')
         if [[ -n "$num" ]]; then
-            if (( $(echo "$num >= $max" | bc -l) )); then
+            if (( $(echo "$max > 0" | bc -l) )) && (( $(echo "$num >= $max" | bc -l) )); then
                 echo "Deleting $proc_dir$folder (because $num >= $max)"
                 rm -rf "$folder"
             fi
