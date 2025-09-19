@@ -174,10 +174,7 @@ if __name__ == "__main__":
             DEM_dir = output_directory + "/DEM/"
             if not os.path.exists(DEM_dir):
                 os.mkdir(DEM_dir)
-
-            if not os.path.exists(DEM_dir+"restart"):
                 os.mkdir(DEM_dir+"restart")
-            if not os.path.exists(DEM_dir+"post"):
                 os.mkdir(DEM_dir+"post")
             ###########################################################################
             # Create wall texture
