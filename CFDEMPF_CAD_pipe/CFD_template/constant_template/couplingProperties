@@ -1,0 +1,229 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.4                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+
+    root            "";
+    case            "";
+    instance        "";
+    local           "";
+
+    class           dictionary;
+    object          couplingProperties;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//===========================================================================//
+// sub-models & settings
+
+modelType "A"; // A or B
+
+couplingInterval 1;
+
+voidFractionModel divided;//centre;//
+
+locateModel engine;//engineIB;//
+
+meshMotionModel noMeshMotion;
+
+IOModel basicIO;
+
+probeModel off;
+
+dataExchangeModel twoWayMPI;
+
+averagingModel dense;//dilute;//
+
+clockModel off;//standardClock;//
+
+smoothingModel off;// localPSizeDiffSmoothing;// constDiffSmoothing; //
+
+forceModels
+(
+    //KochHillDrag
+    //BeetstraDrag
+    //noDrag
+    gradPForce
+    viscForce
+    GidaspowDrag
+   // Archimedes
+    //volWeightedAverage
+    //totalMomentumExchange
+    particleCellVolume
+);
+
+momCoupleModels
+(
+    implicitCouple
+);
+
+turbulenceModelType turbulenceProperties;
+
+//===========================================================================//
+// sub-model properties
+
+localPSizeDiffSmoothingProps
+{
+    lowerLimit 0.1;
+    upperLimit 1e10;
+    dSmoothingLength 1.5e-3;
+    Csmoothing    1.0; 
+}
+
+constDiffSmoothingProps
+{
+    lowerLimit 0.1;
+    upperLimit 1e10;
+    smoothingLength 1.5e-3;
+}
+
+implicitCoupleProps
+{
+    velFieldName "U";
+    granVelFieldName "Us";
+    voidfractionFieldName "voidfraction";
+}
+
+ArchimedesProps
+{
+    gravityFieldName "g";
+}
+gradPForceProps
+{
+    pFieldName "p";
+    voidfractionFieldName "voidfraction";
+    velocityFieldName "U";
+    interpolation true;
+}
+
+viscForceProps
+{
+    velocityFieldName "U";
+    interpolation true;
+}
+noDragProps
+{
+    //noDEMForce;
+    //keepCFDForce;
+}
+volWeightedAverageProps
+{
+    scalarFieldNames
+    (
+        voidfraction
+    );
+    vectorFieldNames
+    (
+    );
+    upperThreshold 0.999;
+    lowerThreshold 0;
+    verbose true;
+}
+totalMomentumExchangeProps
+{
+    implicitMomExFieldName "Ksl";
+    explicitMomExFieldName "none";
+    fluidVelFieldName "U";
+    granVelFieldName "Us";
+}
+GidaspowDragProps
+{
+    verbose true;
+    velFieldName "U";
+    voidfractionFieldName "voidfraction";
+    granVelFieldName "Us";
+    phi 1;
+    //interpolation true; // this case does not like interpolation
+    implDEM_;
+}
+DEMbasedDragProps
+{
+}
+
+DiFeliceDragProps
+{
+    //verbose true;
+    interpolation true;
+}
+
+KochHillDragProps
+{
+    //verbose true;
+    interpolation true;
+    //implForceDEMaccumulated true;
+    //explicitCorr true;
+}
+
+BeetstraDragProps
+{
+    rhoParticle     2000.;
+    interpolation true;
+    useFilteredDragModel ;
+    useParcelSizeDependentFilteredDrag ;
+    k       0.05;
+    aLimit  0.0;
+//    verbose true;
+}
+
+RongDragProps
+{
+    verbose true;
+    interpolation true;
+    implForceDEMaccumulated true;
+}
+
+virtualMassForceProps
+{
+}
+
+particleCellVolumeProps
+{
+    upperThreshold 0.999;
+    lowerThreshold 0.;
+    verbose true;
+}
+
+
+oneWayVTKProps
+{
+    couplingFilename "vtk_out%4.4d.vtk";
+    maxNumberOfParticles 30000;
+}
+
+twoWayFilesProps
+{
+    maxNumberOfParticles 101000;
+}
+
+centreProps
+{
+    alphaMin 0.1;
+}
+
+engineProps
+{
+    treeSearch true;
+}
+
+dividedProps
+{
+    alphaMin 0.05;
+    scaleUpVol 1.0;
+}
+
+"(twoWayMPIProps|M2MProps)"
+{
+maxNumberOfParticles 101000;
+    liggghtsPath "../DEM/run.in";
+}
+// ************************************************************************* //

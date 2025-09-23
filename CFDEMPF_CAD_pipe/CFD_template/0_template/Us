@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,7 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    object      U;
+    location    "0";
+    object      Us;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,26 +21,11 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-
-    pipewall
-    {
-        type            noSlip;
-    }
-
-    inlet
-    {
-        type            uniformFixedValue;
-        uniformValue     table
-        (
-            (0.000 (0 0 0.000))
-            (0.001 (0 0 {fluidVelocity}))
-        );
-    }
-
-    outlet
+    ".*"
     {
         type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

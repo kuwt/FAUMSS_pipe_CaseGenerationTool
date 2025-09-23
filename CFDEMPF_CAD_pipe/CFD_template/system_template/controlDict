@@ -2,44 +2,53 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.6                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+application     pisoFoam;
 
-internalField   uniform (0 0 0);
+startFrom       latestTime;
 
-boundaryField
-{
+startTime       0;
 
-    pipewall
-    {
-        type            noSlip;
-    }
+stopAt          endTime;
 
-    inlet
-    {
-        type            uniformFixedValue;
-        uniformValue     table
-        (
-            (0.000 (0 0 0.000))
-            (0.001 (0 0 {fluidVelocity}))
-        );
-    }
+endTime         {simulationTime};
 
-    outlet
-    {
-        type            zeroGradient;
-    }
+deltaT          {timeStepSize};
+
+writeControl    adjustableRunTime;
+
+writeInterval   {dumpTimeInteval};
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable no;
+
+adjustTimeStep  no;
+
+maxCo 0.1;
+
+libs ( "libfiniteVolumeCFDEM.so" );
 }
-
 // ************************************************************************* //

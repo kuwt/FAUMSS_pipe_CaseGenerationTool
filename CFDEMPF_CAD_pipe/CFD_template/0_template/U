@@ -26,10 +26,10 @@ boundaryField
         type            noSlip;
     }
 
-    inlet
+   inlet
     {
-        type            uniformFixedValue;
-        uniformValue     table
+        type            uniformFixedValueVoidfraction;
+        uniformValue    table
         (
             (0.000 (0 0 0.000))
             (0.001 (0 0 {fluidVelocity}))
