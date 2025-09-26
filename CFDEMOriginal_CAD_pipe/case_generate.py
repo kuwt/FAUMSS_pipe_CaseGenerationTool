@@ -64,6 +64,7 @@ if __name__ == "__main__":
 
         salomePath = loadJSONPara.readwithdefault(json_file_path,"salomePath","/local_disk/tools/SALOME-9.13.0-native-UB20.04-SRC/salome")
         CADSurfaceMeshSize = loadJSONPara.read(json_file_path,"CADSurfaceMeshSize")
+        CADSurfaceMeshSizeMax = loadJSONPara.readwithdefault(json_file_path,"CADSurfaceMeshSizeMax",CADSurfaceMeshSize*2)
         helixSpineAmplitude = loadJSONPara.read(json_file_path,"helixSpineAmplitude")
         helixSpinePeriod = loadJSONPara.read(json_file_path,"helixSpinePeriod")
 
@@ -178,6 +179,7 @@ if __name__ == "__main__":
                 "helixSpinePeriod":helixSpinePeriod,
                 "pipeRadius":pipeRadius,
                 "surfaceMeshSize":CADSurfaceMeshSize,
+                "surfaceMeshSizeMax":CADSurfaceMeshSizeMax,
                 "output_directory" : CADDir
             }
             json_object = json.dumps(json_template_dictionary, indent=4)
